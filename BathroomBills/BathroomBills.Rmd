@@ -1,0 +1,1083 @@
+---
+title: "Why bathroom bills are a problem for all women"
+output: 
+  flexdashboard::flex_dashboard:
+    social: menu
+    source_code: embed
+    includes:
+      in_header: header.html
+header-includes:
+  - \usepackage{amsmath}
+---
+
+<!--
+base_url: https://rpubs.com/transgenderstats/bathroom_bills
+  player: https://alex.miller.im/projects/KDE/plotly_interactive/index.html
+  base_url: https://transgenderstats.shinyapps.io/bathroom_bills
+preview: https://rstudio.github.io/distill/images/javascript-d3-preview.png
+
+-->
+
+```{r licence}
+# MIT License
+
+# Copyright (c) 2021 Transgender Stats
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+```
+
+```{r install, include=FALSE}
+# If not already installed, uncomment this to install latest version of plotly:
+# remotes::install_github("ropensci/plotly")
+# (At time of writing, the version on CRAN doesn't work well with flexdashboard)
+```
+
+```{r libraries, include=FALSE}
+# These are the R packages we need:
+require(tidyverse) # For working with data
+require(plotly) # For interactive plots
+require(viridis) # For colourblind friendly colour palettes
+require(collapsibleTree) # For plotting probability trees
+require(formattable) # For nicely formatted numbers
+require(vembedr) # For embedding videos
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE )
+# Create header.html
+fileConn <- file("header.html")
+writeLines('<meta name="twitter:card" content="summary"></meta>', fileConn)
+writeLines('<meta name="twitter:site" content="@TransgenderStat" />', fileConn)
+writeLines('<meta name="twitter:creator" content="@PropertyOfMyCat" />', fileConn)
+writeLines('<meta property="og:url" content="https://TransgenderStats.github.io/BathroomBills/" />', fileConn)
+writeLines('<meta property="og:title" content="Why bathroom bills are a problem for all women" />', fileConn)
+writeLines('<meta property="og:description" content="Why \"protecting\" single-sex spaces has no practical benefit for women" />', fileConn)
+writeLines('<meta property="og:image" content="https://TransgenderStats.github.io/BathroomBills/preview.jpg" />', fileConn)
+close(fileConn)
+```
+
+```{r bayes}
+# Define equation for Bayes' Theorem:
+bayes <- function(`P(B|A)`, `P(A)`, `P(B|A')`) {
+  `P(A')` <- 1 - `P(A)` # Calculate the complement of A: A'
+  # Return value:
+  (`P(B|A)` * `P(A)`) / ((`P(B|A)` * `P(A)`) + (`P(B|A')` * `P(A')`))
+}
+```
+
+```{r configuration}
+# Sets how finely we want to plot the data:
+`grid step size` <- 0.01 # Step size for computing grid of values
+`prevalence step size` <- 0.05 # Step size for computing range of trans prevalences
+`prevalence values` <- seq(0.1, 3, `prevalence step size`) / 100 # Trans prevalences
+`P(+|trans) values` <- seq(0.5, 1.0, `grid step size`) # List of values for P(+|trans)
+`P(-|cis) values` <- seq(0.5, 1.0, `grid step size`)  # List of values for P(-|cis)
+`P(+|cis) values` <- 1 - `P(-|cis) values` # Calculate complement of P(-|cis)
+`P(-|trans) values` <- 1 - `P(+|trans) values` # Calculate complement of P(+|trans)
+grid <- expand.grid(`P(+|trans) values`,  `P(-|cis) values`) # Create a grid of values
+best <- 0.0058 # Williams Institute's best estimate of trans prevalence
+# Find the index of closest value in our list of prevalences:
+p <- which(abs(`prevalence values` - best) == min(abs(`prevalence values` - best)))
+```
+
+```{r calculations}
+`prevalence values` %>%
+  map_dfr(~grid, .id = "j") %>% # For each prevalence, make a grid of values
+  mutate(`P(trans)` = `prevalence values`[as.integer(j)]) %>% # Create P(trans) values
+  select(-j) %>% # Remove this redundant column; we're finished with it now
+  mutate(`P(cis)` = 1 - `P(trans)`) %>% # Create P(cis) values
+  rename( # Name values appropriately
+    `P(+|trans)` = Var1, # TPR; sensitivity; recall  
+    `P(-|cis)` = Var2 # TNR; specificity 
+  ) %>% 
+  # Calculate complement of P(-|cis):
+  mutate(`P(+|cis)` = 1 - `P(-|cis)`) %>% # FPR; type I error rate; \alpha
+  # Calculate complement of P(+|trans):
+  mutate(`P(-|trans)` = 1 - `P(+|trans)`) %>% # FNR; type II error rate; \beta
+  # Use Bayes' Theorem to calculate the conditional probabilities:
+  mutate(`P(trans|+)` = bayes(`P(+|trans)`, `P(trans)`, `P(+|cis)`)) %>% # PPV; precision
+  mutate(`P(trans|-)` = bayes(`P(-|trans)`, `P(trans)`, `P(-|cis)`)) %>% # FOR; 1 - NPV
+  mutate(`P(cis|+)` = bayes(`P(+|cis)`, `P(cis)`, `P(+|trans)`)) %>% # FDR; 1 - PPV
+  mutate(`P(cis|-)` = bayes(`P(-|cis)`, `P(cis)`, `P(-|trans)`)) %>% # NPV; 1 - FOR
+  # How many more times a cis person is misidentified than a trans person is identified:
+  mutate(rate = `P(cis|+)`/`P(trans|+)`) %>% # FDR/PPV; FP/TP
+  # Partition the data into groups corresponding to trans prevalence:
+  group_split(`P(trans)`, .keep = TRUE) %>% 
+  {.} -> dat
+```
+
+```{r data}
+# Generate data for the plots:
+vals <- list()
+for(step in 1:length(`prevalence values`)) {
+  prevalence <- unique(dat[[step]]$`P(trans)`)
+  vals[[step]] <- list(
+    visible = FALSE, # Plots are invisible by default
+    name = paste0( # Data for tooltip in plot
+      "Trans prevalence:\n", 
+      scales::percent(prevalence, accuracy = 0.01),
+      if_else(
+        prevalence < 0.36/100 | prevalence > 0.95/100,
+        if_else(
+          prevalence > 1.4/100,
+          paste0(
+            "<br><i>Well outside Williams<br>Institute's range",
+            "<br>of plausible values</i>",
+            "<br><b>Probability that this<br>value is true is tiny</b>"
+          ),
+          paste0(
+            "<br><i>Outside Williams<br>Institute's range<br>of plausible values</i>",
+            "<br><b>Probability that this<br>value is true is < 5%</b>"
+          )
+        ),
+        ifelse(
+          round(prevalence, 3) == 0.6/100,
+          "<br><i>Williams Institute's<br>best estimate</i>",
+          paste0(
+            "<br><i>Williams Institute<br>claim 95% probability",
+            "<br>that this value is true</i>"
+          )
+        )
+      )
+    ),
+    `P(-|cis)` = `P(-|cis) values`, # x-axis values
+    `P(+|trans)` = `P(+|trans) values`, # y-axis values
+    rate = matrix( # Plotly requires a matrix of z values for contour plots
+      dat[[step]]$rate, # z-axis values
+      length(`P(+|trans) values`),
+      length(`P(-|cis) values`)
+    ),
+    `P(trans|+)` = matrix( # Plotly requires a matrix of z values for contour plots
+      dat[[step]]$`P(trans|+)`, # z-axis values
+      length(`P(+|trans) values`),
+      length(`P(-|cis) values`)
+    ),
+    `P(trans|-)` = matrix( # Plotly requires a matrix of z values for contour plots
+      dat[[step]]$`P(trans|-)`, # z-axis values
+      length(`P(+|trans) values`),
+      length(`P(-|cis) values`)
+    ),
+    `P(cis|+)` = matrix( # Plotly requires a matrix of z values for contour plots
+      dat[[step]]$`P(cis|+)`, # z-axis values
+      length(`P(+|trans) values`),
+      length(`P(-|cis) values`)
+    ),
+    `P(cis|-)` = matrix( # Plotly requires a matrix of z values for contour plots
+      dat[[step]]$`P(cis|-)`, # z-axis values
+      length(`P(+|trans) values`),
+      length(`P(-|cis) values`)
+    )
+  )
+}
+# Make the plot corresponding to the best estimate of trans prevalence visible:
+vals[p][[1]]$visible = TRUE
+```
+
+```{r create}
+# To avoid retyping code, we can call this function that will create the steps
+# and traces for each figure:
+create <- function(z_var, # What we want to plot on the z-axis
+                   hovertemplate, # What we want to see in the tooltip
+                   plot_title = "", # The plot title
+                   cbar_title = "", # The colour bar (legend) title
+                   tickprefix = NULL, # The prefix shown before z-axis values
+                   ticksuffix = NULL, # The suffix shown before z-axis values
+                   cbar_pal = "C", # The viridis colour palette
+                   cbar_tickformat = "", # If "%" show z-axis values as percentages
+                   minZ = NULL, # Set lower limit for values on the z-axis/colour bar
+                   maxZ = NULL, # Set upper limit for values on the z-axis/colour bar
+                   cbar_x = 1, # Set horizontal position of colour bar
+                   cbar_y = 1, # Set vertical position of colour bar
+                   cbar_len = 1 # Set length of colour bar
+) {
+  # Create steps and plot all traces:
+  steps <- list()
+  fig <- plot_ly() 
+  for (i in 1:length(`prevalence values`)) {
+    # Set limits for colour bar if not provided:
+    real_minZ <- min(vals[i][[1]][[z_var]], na.rm = TRUE) # Determined from the data
+    real_maxZ <- max(vals[i][[1]][[z_var]], na.rm = TRUE) # Determined from the data
+    min_z <- ifelse(is.null(minZ), real_minZ, minZ)
+    max_z <- ifelse(is.null(maxZ), real_maxZ, maxZ)
+    # Superpose plots corresponding to each trans prevalence:
+    fig <- add_contour(
+      fig,
+      # Plot data here:
+      x = scales::percent(vals[i][[1]]$`P(+|trans)`),
+      y = scales::percent(vals[i][[1]]$`P(-|cis)`),
+      z = vals[i][[1]][[z_var]],
+      # Set default visibility of plot:
+      visible = vals[i][[1]]$visible,
+      # Define name of plot for tooltip:
+      name = vals[i][[1]]$name,
+      type = "contour", 
+      contours = list(
+        showlabels = TRUE, # Show labels on contour lines
+        # Set common domain for z-axis values:
+        start = min_z,
+        end = max_z,
+        coloring = "heatmap", # Gives us a continuous colour palette
+        labelfont = list(
+          color = 'white' # Make contour labels visible on dark colours
+        )
+      ),
+      autocontour = FALSE,
+      transpose = TRUE,
+      # ncontours = 20, # Uncomment for more contour lines
+      line = list(
+        color = "white" # Make contour lines visible on dark colours
+      ),
+      # Use a colour palette that is easier to read by those with colourblindness:
+      colors = viridis_pal(option = cbar_pal)(100), 
+      showscale = TRUE, # Show the legend
+      # Format the legend:
+      colorbar = list(
+        title = cbar_title, # Set the colour bar title
+        x = cbar_x, # Set the colour bar horizontal position
+        y = cbar_y, # Set the colour bar vertical position
+        len = cbar_len, # Set the colour bar length
+        tickprefix = tickprefix, # Set the z-axis value prefix
+        ticksuffix = ticksuffix, # Set the z-axis value prefix
+        tickformat = cbar_tickformat # Set z-axis values to be percentages if needed
+      ),
+      opacity = 1,
+      hovertemplate = hovertemplate # This is what will be be printed in the tooltip
+    ) %>% 
+      layout( # Format the axes and legend
+        title = list(
+          text = plot_title, 
+          xref = 'x', 
+          yref = 'y', 
+          x = 0.5, 
+          y = 0.98,
+          font = list(size = 15)
+        ),
+        xaxis = list(
+          fixedrange = TRUE,
+          title = paste0(
+            # P(+|trans):
+            "Accuracy for identifying\n",
+            "a person who is trans"
+          ),
+          ticksuffix = "%"
+        ),
+        yaxis = list(
+          fixedrange = TRUE,
+          automargin = TRUE,
+          title = paste0(
+            # P(-|cis):
+            "Accuracy for identifying\n",
+            "a person who is not trans\n&nbsp;"
+          ),
+          ticksuffix = "%"
+        )
+      ) 
+    
+    # Set the steps for the trans prevalence slider control:
+    step <- list(
+      label = scales::percent(`prevalence values`[i], accuracy = 0.01), # Set label
+      args = list(
+        'visible',
+        rep(FALSE, length(vals)
+        )
+      ),
+      method = 'restyle'
+    )
+    # This will make the plot corresponding the selected trans prevalence visible:
+    step$args[[2]][i] = TRUE
+    steps[[i]] = step
+  }
+  return(list("fig" = fig, "steps" = steps))
+}
+```
+
+```{r margins}
+# Define the margins around the plot area:
+margins <- list(
+  l = 50,
+  r = 50,
+  b = 100, # We need extra space for the slider
+  t = 50,
+  pad = 4
+)
+```
+
+Why "protecting" single-sex spaces has no practical benefit for women {data-navmenu="Menu"}
+=========================================
+
+<b>Why "protecting" single-sex spaces has no practical benefit for women</b>
+
+Column {.tabset .tabset-fade}
+-----------------------------------------
+
+### Ratio of incorrect to correct identifications
+
+```{r out1}
+# Create the base figure and steps for the first plot:
+out1 <- create(
+  z_var = "rate", 
+  hovertemplate = paste0(
+    "Probability to correctly identify a person as:\n",
+    "\t • Trans, given that they are trans: %{x}<br>",
+    "\t • Not trans, given that they are not trans: %{y}<br>",
+    "How many more times people who are not trans\n",
+    "are misidentified as trans than trans people\n",
+    "are correctly identified: %{z:.1f}×",
+    "<extra>%{fullData.name}</extra>"
+  ), 
+  plot_title = paste0(
+    "Ratio of number of people misidentified as trans\n",
+    "to number of people correctly identified as trans\n&nbsp;"
+  ),
+  cbar_title = paste0(
+    "How many more\n",
+    "times people who\n",
+    "are not trans\n",
+    "are misidentified\n",
+    "as trans than\n",
+    "trans people are\n",
+    "correctly identified"
+  ), 
+  tickprefix = NULL,
+  ticksuffix = "×",
+  cbar_pal = "C", 
+  cbar_tickformat = "",
+  minZ = NULL, 
+  maxZ = NULL,
+  cbar_x = 1, 
+  cbar_y = 1, 
+  cbar_len = 1
+)
+```
+
+```{r slider1}
+# Add slider control to plot:
+out1$fig %>%
+  layout(
+    sliders = list(
+      list(
+        active = p - 1, # Subtract one for the blank plot at the start
+        currentvalue = list(
+          prefix = "Percentage of population who are trans: ",
+          suffix = "<br>(Values < 0.36% or > 0.95% are unlikely to be plausible)"
+        ),
+        steps = out1$steps,
+        pad = list(t = 100, r = 0, b = 0, l = 0),
+        scene = list(x = 1, y = 1, z = 1)
+      )
+    )
+  ) %>% 
+  {.} -> fig1
+```
+
+```{r plot1}
+fig1 %>% 
+  config(
+    # Control which modebar buttons we want to show the user:
+    modeBarButtons = list(
+      list(
+        "toImage",
+        # "resetScale2d",
+        "toggleSpikelines")
+    ), 
+    displaylogo = FALSE, # Turn off the plotly logo
+    toImageButtonOptions = list(filename = "plotOutput1")
+  ) %>% 
+  # Set the margins and allow the plot to autosize to the user's display:
+  layout(margin = margins, autosize = TRUE) %>% 
+  {.} -> fig1 # Done
+```
+
+```{r show_fig1, preview=TRUE}
+fig1
+```
+> Move your mouse pointer over the plot to see the ratio of mistaken identifications to correct identifications. Higher numbers on labelled contours and lighter colours represent worsening performance.
+
+### (Mis)identification probabilities {.no-mobile}
+
+```{r out2a}
+# Create the base figure and steps for the first subplot of the second plot:
+out2a <- create(
+  z_var = "P(cis|+)", 
+  hovertemplate = paste0(
+    "Probability to correctly identify a person as:\n",
+    "\t • Trans, given that they are trans: %{x}<br>",
+    "\t • Not trans, given that they are not trans: %{y}<br>",
+    "Probability that a person identified<br>",
+    "as trans is actually not trans: %{z:.2%}",
+    "<extra>%{fullData.name}</extra>"
+  ), 
+  plot_title = "", 
+  cbar_title = paste0(
+    "Probability that a\n",
+    "person identified\n",
+    "as trans is actually\n",
+    "not trans <i>(mistaken\n",
+    "identification)</i>"
+  ),
+  tickprefix = NULL,
+  ticksuffix = NULL,
+  cbar_pal = "D", 
+  cbar_tickformat = "%",
+  minZ = 0, 
+  maxZ = 1,
+  cbar_x = 1, 
+  cbar_y = 1.05, 
+  cbar_len = 0.5
+)
+```
+
+```{r out2b}
+# Create the base figure and steps for the second subplot of the second plot:
+out2b <- create(
+  z_var = "P(trans|+)", 
+  hovertemplate = paste0(
+    "Probability to correctly identify a person as:\n",
+    "\t • Trans, given that they are trans: %{x}<br>",
+    "\t • Not trans, given that they are not trans: %{y}<br>",
+    "Probability that a person identified<br>",
+    "as trans is actually trans: %{z:.2%}",
+    "<extra>%{fullData.name}</extra>"
+  ), 
+  plot_title = paste0(
+    "Probabilities of misidentification as trans\n",
+    "and correct identification as trans"
+  ), 
+  cbar_title = paste0(
+    "Probability that a\n",
+    "person identified\n",
+    "as trans is actually\n",
+    "trans <i>(correct\n",
+    "identification)</i>"
+  ),
+  tickprefix = NULL,
+  ticksuffix = NULL,
+  cbar_pal = "D", 
+  cbar_tickformat = "%",
+  minZ = 0, 
+  maxZ = 1,
+  cbar_x = 1, 
+  cbar_y = 0.5, 
+  cbar_len = 0.5
+)
+```
+
+```{r assemble}
+# Assemble the subplots into a single figure:
+fig2a <- out2a$fig
+fig2b <- out2b$fig
+
+subplot(
+  fig2a, 
+  fig2b, 
+  nrows = 2, 
+  margin = 0.05, 
+  shareX = TRUE, 
+  shareY = TRUE, 
+  titleX = TRUE, 
+  titleY = TRUE
+) -> fig2
+```
+
+```{r slider2}
+# Add slider control to plot:
+fig2 %>%
+  layout(
+    sliders = list(
+      list(
+        active = p - 1, # Subtract one for the blank plot at the start
+        currentvalue = list(
+          prefix = "Percentage of population who are trans: ",
+          suffix = "<br>(Values < 0.36% or > 0.95% are unlikely to be plausible)"
+        ),
+        steps = out2a$steps,
+        pad = list(t = 100, r = 0, b = 0, l = 0),
+        scene = list(x = 1, y = 1, z = 1)
+      )
+    )
+  ) %>% 
+  {.} -> fig2
+```
+
+```{r plot2}
+fig2 %>% 
+  config(
+    # Control which modebar buttons we want to show the user:
+    modeBarButtons = list(
+      list(
+        "toImage",
+        # "resetScale2d",
+        "toggleSpikelines")
+    ), 
+    displaylogo = FALSE, # Turn off the plotly logo
+    toImageButtonOptions = list(filename = "plotOutput2")
+  ) %>% 
+  # Set the margins and allow the plot to autosize to the user's display:
+  layout(margin = margins, autosize = TRUE) %>% 
+  {.} -> fig2 # Done
+```
+
+```{r show_fig2}
+fig2
+```
+
+> Move your mouse pointer over the plot to see the probabilities for mistaken identifications and correct identifications.
+
+Column {data-width=250}
+-----------------------------------------
+
+### How to use and interpret
+
+**The plot shows that women who are not trans are misidentified as trans many more times than trans women are correctly identified. For this not to be true would require that trans women and women who are not trans can be identified with accuracies that are far beyond those that are plausible under realistic circumstances.**
+
+*****
+
+<b>Horizontal axis:</b> the accuracy for identifying a person who is trans. This is the probability to identify a person as trans, given that they are indeed trans; the percentage of trans people who are correctly identified as trans. 
+
+<b>Vertical axis:</b> the accuracy for identifying a person who is not trans. This is the probability to identify a person as not trans, given that they are indeed not trans; the percentage of people who are not trans who are correctly identified as not trans.
+
+These two probabilities can be equal, but they are not necessarily so. There is no reason that they should be the same; it could be that one group of people is easier to classify than the other. Both probabilities are expressed as percentages. Both axes start at 50% probability, which is equivalent to predicting someone's gender identity by flipping a fair coin.
+
+<b>Colour:</b> the ratio of the number of people who are not trans who are misidentified as trans to the number of trans people who are correctly identified as trans. This is equivalent to the ratio of the probability that a person who is not trans is mistakenly identified as trans to the probability that a person who is trans is correctly identified as trans. See legend.
+
+<b>Contours:</b> represent lines of equal ratio.
+
+<b>Slider:</b> can be used to vary the trans prevalence and explore different scenarios. The default value corresponds to the [best estimate](http://williamsinstitute.law.ucla.edu/wp-content/uploads/How-Many-Adults-Identify-as-Transgender-in-the-United-States.pdf) of trans prevalence in the US population by the Williams Institute at UCLA School of Law$^1$. The lower and upper limits represent extreme values and were chosen to more than fully contain the range of plausible values for trans prevalence.
+
+Moving the mouse pointer over the plot will display the ratio of the number of mistaken identifications to the number of correct identifications.
+
+### Details
+
+<a name="top1"></a>
+In this section:<br>
+<a href="#intro">What is a bathroom bill?</a><br>
+<a href="#prevalence">Trans prevalences</a><br>
+<a href="#probabilities">Identification probabilities</a><br>
+
+*****
+
+<a name="intro"></a><b>What is a bathroom bill?</b>
+
+A "bathroom bill" is the common name for legislation that requires people to use toilets and other sex-segregated public facilities that correspond to the sex listed on their birth certificates. Supporters of bathroom bills say that these laws are needed to protect "single-sex spaces". This is a term that is usually used to mean "women's spaces". Bathroom bills specifically prohibit transgender people from using toilets and single-sex facilities that align with their gender identity. Transgender (often shortened to *trans*) is a term referring to people who identify as a gender other than the one they were assigned at birth. Supporters of bathroom bills tend to focus on people assigned male at birth who later transition to female and say that without these laws, sexual predators could easily say that they are a trans woman with the right to use a women's bathroom to gain access to potential victims.<a href="#top1">↩</a>
+
+*****
+
+<a name="prevalence"></a><b>Trans prevalences</b>
+
+These results are dependent on the percentage of trans people in the general population. We do not know precisely what the prevalence of trans people is, but we know that it is very small. [Estimates](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4823815/) of the prevalence of trans people are highly dependent on the specific case definitions used in studies$^2$. A 2011 [survey](https://www.equalityhumanrights.com/sites/default/files/technical_note_final.pdf) conducted by the Equality and Human Rights Commission in the UK found that of 10,026 respondents, 1.4% would be classified into a gender minority group$^3$. A 2016 systematic [review](https://www.sciencedirect.com/science/article/abs/pii/S1743609516001338) and meta-analysis of empirical literature on the prevalence of trans people found that estimates range between 0.01% to 0.8%, depending on specific case definitions$^2$. In a 2018 [document](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/721642/GEO-LGBT-factsheet.pdf) by the UK Government Equalities Office tentatively estimated that there are approximately 200,000 to 500,000 trans people in the UK$^4$; based on an [estimate](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualmidyearpopulationestimates/mid2018#:~:text=The%20population%20of%20the%20UK,any%20year%20since%20mid%2D2004.) of the UK population in 2018 (66,436,000) this corresponds to a trans prevalence of 0.30% to 0.75%$^5$. A meta-analysis using data from national surveys to estimate the population size of trans people in the US [estimated](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5227946/#:~:text=Estimates%20of%20the%20number%20of,of%20the%20entire%20US%20population.) that 390 in 100,000 adults in the US are trans, or 0.39%$^6$. The Williams Institute at UCLA School of Law [estimated](http://williamsinstitute.law.ucla.edu/wp-content/uploads/How-Many-Adults-Identify-as-Transgender-in-the-United-States.pdf) that about 0.58% of the US population are trans. Furthermore, the Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; that is to say, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%$^1$.
+
+According to a 2019 PinkNews [article](https://www.pinknews.co.uk/2019/04/02/percentage-us-population-transgender-statistics/)$^7$, LGBT statistics by [GLAAD](https://www.glaad.org/files/aa/2017_GLAAD_Accelerating_Acceptance.pdf) reported in 2017 that an estimated 3% of the US population identified as trans across various age groups$^8$. The notes accompanying the statistics say that 2,037 adults were polled, of which 1,708 were non-LGBTQ, and a further 100 were rejected from the sample because they declined to answer questions on gender identity and sexual orientation. This means that 229 of the 1937 people who were included as part of the analysis were LGBTQ. It is possible to work backwards from the published results to calculate the number of trans people in the sample: 55, which corresponds to a prevalence of 2.8%. Given the small sample size, it would be judicious to be cautious about accepting GLAAD's estimated trans prevalence, which differs significantly from other published figures, the overwhelming majority of which are based on much larger samples and appear in peer-reviewed literature. Although a prevalence of 3% should definitely be considered an outlier, it included in the range of values that the user can choose from.
+
+In 2021, a [Gallup poll](https://news.gallup.com/poll/329708/lgbt-identification-rises-latest-estimate.aspx) of over 15,000 Americans aged 18 and over found that 0.6% of the US adult population self-identify as trans$^9$. This result is identical to the estimate reported by the Williams Institute five years prior.
+
+Although both the Williams Institute and Gallup report the overall trans prevalence in the US is 0.6%, both note that there are differences in trans prevalence between different age groups: in each successive generation, trans prevalence increases. One of the main reasons trans self-identification has been increasing over time is that younger generations are far more likely to consider themselves to be trans, which is likely due to [increasing acceptance](https://news.gallup.com/poll/258065/gallup-first-polled-gay-issues-changed.aspx) of LGBT people within the wider population$^{10}$.
+
+The relative prevalence of specific gender identities is somewhat uncertain. The trend in the literature is that trans women (females assigned ‘male’ at birth) are usually identified at higher rates than trans males (males assigned ‘female’ at birth). However, in many cases these rates are based on surveys of subjects enrolled in plastic surgery, endocrinology, or primary care clinics, and as such only reflect populations that are well-integrated into existing healthcare systems and accessing care, so should not be taken as a definitive indication of actual population sizes. However, we do know that even if the entire trans population is female, the Williams Institute study says that we can be 95% certain that trans women make up less than 0.95% of the US general population, and this provides a good indication of their prevalence in comparable countries.<a href="#top1">↩</a> 
+
+*****
+
+<a name="probabilities"></a><b>Identification probabilities</b>
+
+It may be surprising to the reader that women who are not trans will be incorrectly identified as trans many more times than trans women are identified --- even if the probabilities to identify someone as trans or not trans, given that they are indeed trans or not trans respectively, are very high. Intuitively we might expect that if out of 100 trans women we were able to recognise 99 of them as trans, there ought to be a high probability that a person we identify as trans in the general population is indeed trans. But this is not the case! In fact, this probability is very small. Conversely, the probability that they are actually not trans is very high. Therefore the ratio between the latter and the former is large. This is because both of these probabilities are strongly dependent on the trans prevalence, which is *tiny*.<a href="#top1">↩</a>
+
+When someone is recognised as trans, what is the probability that they are actually trans? {data-navmenu="Menu" data-orientation=rows}
+=====================================
+
+<b>When someone is recognised as trans, what is the probability that they are actually trans?</b>
+
+Row
+-----------------------------------------
+
+### Probability tree
+
+```{r tree}
+# Define the structure of the probability tree:
+tree <- data.frame(
+  branches = c(
+    NA, 
+    "General population", 
+    "General population", 
+    "Not trans", 
+    "Not trans", 
+    "Trans", 
+    "Trans"
+  ),
+  leaves = c(
+    "General population", 
+    "Not trans", 
+    "Trans", 
+    "Identified as not trans", 
+    "Identified as trans", 
+    "Identified as trans", 
+    "Identified as not trans"
+  ),
+  # Probabilities:
+  percentage = c(
+    1, 
+    0.9942, 
+    0.0058,
+    0.97 * 0.9942, 
+    0.03 * 0.9942, 
+    0.99 * 0.0058,
+    0.01 * 0.0058
+  ),
+  # Choose some nice colours for the nodes; they don't have any special meaning:
+  colour = c(
+    "#FFFFBF", # General population
+    "#FC8D59", # Not trans
+    "#99D594", # Trans
+    "#FEE08B", # Identified as not trans
+    "#D53E4F", # Identified as trans
+    "#3288BD", # Identified as trans
+    "#E6F598"  # Identified as not trans
+  ),
+  # Text with parenthetical remarks:
+  remarks = c(
+    "", 
+    "", 
+    "",
+    "<br>(True negative)", 
+    "<br>(False positive)", 
+    "<br>(True positive)",
+    "<br>(False negative)"
+  ),
+  # Text explaining how the probabilities were calculated:
+  maths = c(
+    "", 
+    "P(not trans) = ", 
+    "P(trans) = ",
+    "P(−|not trans) × P(not trans)<br>= 97% × 99.42%<br>= ", 
+    "P(+|not trans) × P(not trans)<br>= 3% × 99.42%<br>= ", 
+    "P(+|trans) × P(trans)<br>= 99% × 0.58%<br>= ",
+    "P(−|trans) × P(trans)<br>= 1% × 0.58%<br>= "
+  )
+)
+
+# The probabilities differ in size greatly, such that the smallest node would be
+# hardly visible if all the nodes were scaled in proportion to their
+# corresponding probabilities, so we choose a non-linear scaling which allows
+# for the smallest node to be still visible; we want the user to be able to
+# mouse-over it to see the tool tip:
+tree$nodesize <- tree$percentage^(1/2)
+
+# Define tooltip to be shown to the user for a mouse-over event:
+tree$tooltip <- paste0(
+  "<b>",
+  tree$leaves,
+  "</b>",
+  "<i>",
+  tree$remarks,
+  "</i>",
+  "<br>",
+  "Probability:<br>",
+  tree$maths,
+  formattable::percent(tree$percentage)
+)
+
+# Create the probability tree:
+collapsibleTreeNetwork(
+  tree,
+  zoomable = FALSE,
+  collapsed = FALSE,
+  attribute = "percentage", 
+  nodeSize = "nodesize", 
+  fontSize = 15, 
+  fill = "colour",
+  tooltipHtml = "tooltip"
+) -> probability_tree
+```
+
+```{r fig3}
+probability_tree
+```
+> Move your mouse pointer over the nodes in the tree to see the probabilities for each outcome. The example shown is for a trans prevalence of 0.58%, 99% accuracy to identify trans people, and 97% accuracy to identify people who are not trans.
+
+Row
+-----------------------------------------
+
+### How to use and interpret
+
+If a person is recognised as trans, this does not necessarily mean that the person is actually trans. Here we demonstrate, with a simple example, how to calculate the probability that a person recognised as trans is actually trans. This will help the reader to understand why bathroom bills do not benefit women. Although the mathematics is not complicated, we provide an interactive diagram to help the reader more easily understand the calculation.
+
+**The reader does not need to understand algebra to understand the calculation; we will walk through the calculation step-by-step using the probability tree diagram that will make the calculation exceptionally simple: the mathematics required to understand this calculation (percentages and basic concepts of probability) is typically taught to children in the [US](http://www.corestandards.org/assets/CCSSI_Math%20Standards.pdf)$^{11}$ and [UK](https://www.gov.uk/government/publications/national-curriculum-in-england-mathematics-programmes-of-study/national-curriculum-in-england-mathematics-programmes-of-study)$^{12}$ by age 14.**
+
+The probability tree diagram shows all the possible events. The size of the nodes provides an indication of the probability of the event that it corresponds to: large nodes indicate large probability, small nodes indicate small probability. A person from the general population may be either trans or not trans. If the person is trans, they may be identified as trans (positive identification), or they may be identified as not trans (negative identification), and similarly if the person is not trans. This results in four possible outcomes, each with different probabilities, which we calculate by multiplying the probabilities along each branch of the probability tree. The probabilities for all the outcomes sum to 100%, as they must, because all possible outcomes are exhausted. The ends of the branches represent what can be observed and known with certainty. Whether a person is trans or not is not directly observable and can only be inferred with some uncertainty.
+
+To calculate the probability that a person is trans (or not), given that they were identified as trans (or not), divide the probability of the outcome of interest by the sum of the probabilities for the two possible outcomes corresponding to how the person was identified (*identified as trans* or *identified as not trans*). See the discussion for more details. 
+
+### Details
+
+<a name="top2"></a>
+In this section:<br>
+<a href="#implementation">How will single-sex spaces be protected?</a><br>
+<a href="#performance">How well can people tell if a person is trans or not?</a><br>
+<a href="#scenarios">Considering all possible scenarios</a><br>
+
+*****
+
+<a name="implementation"></a><b>How will single-sex spaces be protected?</b>
+
+Supporters of bathroom bills say that these laws are needed to protect women's spaces. For safeguarding to be effective it is essential to understand how such measures will be implemented. We must ask: how will bathroom bills will be enforced? In the future, should we expected to produce identifying documents before being allowed to use a public toilet --- such as a passport, a driver's licence, or an ID card? This does not seem plausible. Nor does is seem likely that there will be a guard or attendant posted outside every public toilet who will check everyone's gender before they may enter. It would be prohibitively expensive for the taxpayer if video surveillance cameras that are live-monitored remotely are installed outside the entrance to every public toilet. This would be a waste of public money, as we shall demonstrate in the following discussion. Replacing guards or attendants with facial recognition and biometric identification systems to perform a gender check on toilet users would be even more expensive and has no chance of being effective: a 2019 [study](https://dl.acm.org/doi/10.1145/3359246) found that present-day computer vision systems from Amazon, Clarifai, Microsoft, and others are consistently poor at identifying trans people and misidentify trans men and women 38% of the time$^{13}$. An exhaustive bodily examination and/or chromosomal scan will not be performed on people before they can enter a public toilet.
+
+The most realistic scenario is that single-sex spaces will be self-policed by the people that use them. Therefore we should ask: how well will people who use these facilities be able to spot other users whose "assigned at birth" gender corresponds with the facility, and those for whom it does not? That is to say, how well can people tell if a person is trans or not?
+
+*****
+
+<a name="performance"></a><b>How well can people tell if a person is trans or not?</b>
+
+In this example, let's be charitable to those who advocate for bathroom bills and assume that is is possible to identify trans people with *very high* accuracy --- far greater accuracy than is actually plausible under realistic circumstances. Let's say that trans people can be identified with 99% accuracy.
+
+Moreover, when someone is identified as trans, we'll say that this is a *positive identification*: this is evidence that supports the hypothesis that the person is trans. Conversely, when someone is identified as not trans, we'll say that this is a *negative identification*: this is evidence that opposes the hypothesis that the person is trans. We say that the probability that a trans person is identified as trans (positive identification) is 99%, while probability of getting the wrong result (negative identification) is 1%. In mathematical notation we write this as:
+
+$$
+P(+|\mathrm{trans}) = 0.99,~\\
+P(-|\mathrm{trans}) = 0.01
+$$
+$P$ denotes a probability, and the vertical bar "$|$" means "given", so we can read the above as: "the probability that someone is positively identified, given that they are trans, is 0.99 (99%), and the probability that someone is negatively identified, given that they are trans, is 0.01 (1%)". This is equivalent to the statement that 99 out of a hundred trans people can be correctly identified as trans, and that one person who is actually trans will be mistaken as not trans. We say that the *true positive rate* is 99% and the *false negative rate* is 1%. These are all equivalent statements.
+
+We're also interested in what the probability is that a person is negatively identified, given that the person is in fact not trans. This is not necessarily equal to the accuracy for identifying a trans person. We may hypothesise that it may be easier to identify one group of people than the other. Let's assume that the probability that a person is negatively identified, given that they are indeed not trans, is 97%; it then follows that the probability of getting the wrong result (positively identification) is 3%:
+
+$$
+P(-|\mathrm{not~trans}) = 0.97,~\\
+P(+|\mathrm{not~trans}) = 0.03
+$$
+This means that 97 out of a hundred people who are not trans can be correctly identified as not trans, and three people who are not trans will be mistaken as trans. We say that the *true negative rate* is 97% and the *false positive rate* is 3%. 
+
+We know that the prevalence of trans people in the general population is very small. Estimates of the prevalence of trans people are highly dependent on the specific case definitions used in studies. For this analysis it doesn't matter too much which of these figures we use, because they are all so small as to not make a significant difference to the results, but for the moment let's arbitrarily pick 0.58% as the prevalence of trans people, which is an <a href="#prevalence">estimate</a> of the percentage of the population of the US who are trans. This means that prior to making any observation, if you picked someone at random from the population, the probability that you would pick a trans person is 0.58%, and the probability that you would pick a person who is not trans is 99.42%:
+
+$$
+P(\mathrm{trans}) = 0.0058,~\\
+P(\mathrm{not~trans}) = 0.9942
+$$
+
+This information is all we need, and is summarised on the probability tree diagram. Moving the mouse pointer over a node will trigger a pop-up display of the probability of the event represented by that node. Here are the probabilities for the four possible outcomes:
+
+ * Not trans and identified as not trans: $P(-|\textrm{not trans})P(\textrm{not trans}) = 97\% \times 99.42\% = 96.44\%\\$
+ * Not trans and identified as trans: $P(+|\textrm{not trans})P(\textrm{not trans}) = 3\% \times 99.42\% = 2.98\%\\$
+ * Trans and identified as trans: $P(+|\textrm{trans})P(\textrm{trans}) = 99\% \times 0.58\% = 0.57\%\\$
+ * Trans and identified as not trans: $P(-|\textrm{trans})P(\textrm{trans}) = 1\% \times 0.58\% = 0.01\%$
+
+The probability $P(+|\mathrm{trans}) = 99\%$ tells us how accurately trans people can be identified. It tells us the performance of the means to identify trans people. *It's a property of the identification method, and not of the person being identified.* What we actually want to know is something different: we want to know what is the probability that someone who is identified as trans is in fact trans. That is, what is the probability that a person is indeed trans, given that they were positively identified? We write this as: $P(\mathrm{trans}|+)$. This is not the same as $P(+|\mathrm{trans})$. This can be proved mathematically, but can be understood intuitively as follows: $P(\textrm{rain}|\textrm{umbrella})$, the probability that it is raining, given that you are carrying an open umbrella, is not the same as $P(\textrm{umbrella}|\textrm{rain})$, the probability that you are carrying an open umbrella, given that it is raining. The most likely reason for carrying an open umbrella is that it is raining, so if you are carrying an open umbrella then it is probably raining. However, if it is raining, this does not necessarily mean that then you are carrying an open umbrella! When we write $P(B|A)$, this is the *conditional probability* that an event $B$ will occur given the knowledge that an event $A$ has already occurred: *the order of events is important*. 
+
+For the conditional probability $P(+|\mathrm{trans})$, we know that a trans person was observed, but we don't know with certainty if there will be a positive identification: it is possible that the person will be negatively identified (identified as not trans).
+
+For the conditional probability $P(\mathrm{trans}|+)$, we know there was a positive identification, but we don't know with certainty if a trans person was observed.
+
+Let's say that someone enters a public toilet or single-sex facility and they are judged to be trans by other users of the facility. What is the probability that they are actually trans? We can imagine repeating this experiment many times and measuring what happens. Calculating $P(\mathrm{trans}|+)$ is equivalent to calculating the percentage of people who were identified as trans who are actually trans. The two outcomes that result in a positive identification are:
+
+ * Trans and identified as trans: $P(+|\textrm{trans})P(\textrm{trans}) = 99\% \times 0.58\% = 0.57\%\\$
+ * Not trans and identified as trans: $P(+|\textrm{not trans})P(\textrm{not trans}) = 3\% \times 99.42\% = 2.98\%$
+
+The probability that either of these events occur is the sum of their individual probabilities:
+$$
+P(+|\textrm{trans})P(\textrm{trans}) + P(+|\textrm{not trans})P(\textrm{not trans})
+$$
+We're interested in the outcome in which a trans person is observed and they are identified as trans, which occurs with probability:
+$$
+P(+|\textrm{trans})P(\textrm{trans})
+$$
+Therefore, the fraction (or percentage) of those identified as trans who are actually trans is:
+$$
+P(\mathrm{trans}|+) = \frac{P(+|\textrm{trans})P(\textrm{trans})}{P(+|\textrm{trans})P(\textrm{trans}) + P(+|\textrm{not trans})P(\textrm{not trans})}
+$$
+As an aside, this is just a specialised case of [Bayes' Theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem)$^{14}$:
+$$
+P(A|B) = \frac{P(B|A)P(A)}{\sum_i{P(B|A_i)P(A_i)}}
+$$
+Bayes' Theorem allows us to make probability calculations of the form: what is the probability of $A$ given that $B$ is true. This is textbook mathematics that's been known since [1763](https://royalsocietypublishing.org/doi/10.1098/rstl.1763.0053) and has enormous importance in the field of statistics$^{15}$. Rather than simply state the theorem without proof and grind through the mathematics, what we've just done is derive what we need from scratch, using the simplest of ingredients, and as a side-effect provide a gentle introduction to Bayes' Theorem.
+
+For our specific example, we have:
+
+\begin{align}
+P(\mathrm{trans}|+) &= \frac{P(+|\mathrm{trans})P(\mathrm{trans})}{P(+|\mathrm{trans})P(\mathrm{trans})+P(+|\mathrm{not~trans})P(\mathrm{not~trans})}\\ &\\ &= \frac{0.99\times0.0058}{0.99\times0.0058 + 0.03\times0.9942}\\ &\\ &= 0.161
+\end{align}
+
+So the probability that a person is trans, given that they were recognised as trans, is only 16.1%. This may seem surprising, given the 99% accuracy to identify trans people. The result is small because the prevalence of trans people in the population is so tiny.
+
+Similarly, the probability that a person is not trans, given they were positively identified, $P(\mathrm{not~trans}|+)$, is:
+
+\begin{align}
+P(\mathrm{not~trans}|+) &= \frac{P(+|\mathrm{not~trans}) P(\mathrm{not~trans})}{P(+|\mathrm{not~trans}) P(\mathrm{not~trans}) + P(+|\mathrm{trans}) P(\mathrm{trans})}\\ &\\ &= \frac{0.03\times0.9942}{0.03\times0.9942 + 0.99\times0.0058}\\ &\\ &= 0.839
+\end{align}
+
+We can check our result by noting that if a person has been positively identified, the only alternative to the outcome in which they are not trans is the outcome in which they are trans, therefore:
+
+$$
+P(\mathrm{not~trans}|+) = 1 - P(\mathrm{trans}|+) = 1 - 0.161 = 0.839.
+$$
+Thus we have shown that women who are not trans will be misidentified as trans 83.9% of the time. **In this scenario, five times more women that are not trans are misidentified as trans than trans women are correctly identified!**
+
+*****
+
+<a name="scenarios"></a><b>Considering all possible scenarios</b>
+
+How dependent is our previous result on our choice of numbers? We'd like to make sure that we didn't knowingly or unknowingly pick "lucky numbers" that are guaranteed to support our claim.
+
+The inputs to our analysis are: 
+
+* $P(+|\mathrm{trans})$, the probability that a trans person is judged to be trans (the true positive rate), 
+* $P(-|\mathrm{not~trans})$, the probability that a person who is not trans is judged to be not trans (the true negative rate),
+* $P(\mathrm{trans})$, the prevalence of trans people in the population.
+
+Just as a reminder: the first two listed above may be equal, but there is no requirement for them to be so. Also, the prevalence of trans people in the population is uncertain, but not completely unknown, and importantly we know the number is very small.
+
+Let's see what happens when we try different values of $P(+|\mathrm{trans})$ and $P(-|\mathrm{not~trans})$. Let's assume that it is possible to accurately identify trans people at least 50% of the time, and similarly for people who are not trans, which is at least what would be expected from flipping a fair coin to predict someone's gender identity. Consequently, $P(+|\mathrm{trans})$ and $P(-|\mathrm{not~trans})$ both range between 50% and 100%. How many more times will the people who are not trans be misidentified as trans than trans people are correctly identified? That is, we want to know:
+
+$$
+\frac{P(\mathrm{not~trans}|+)}{P(\mathrm{trans}|+)}.
+$$
+Now let's consider *all possible scenarios* for any specified trans prevalence by assuming a continuum of values for $P(+|\mathrm{trans})$ and $P(-|\mathrm{not~trans})$. Each pair of values defines the accuracy with which people who are trans, and those who are not, can be identified. We can plot these values as points in a graph, $P(+|\mathrm{trans})$ on the horizontal axis and $P(-|\mathrm{not~trans})$ on the  vertical axis, and colour them by how many more times people who are not trans are misidentified than trans women are identified. We can also plot contour lines that can be annotated to show this information more clearly. This is how we obtained the plot on the first page.
+
+When a trans person uses a public toilet, who is at risk? {data-navmenu="Menu"}
+=========================================
+
+<b>When a trans person uses a public toilet, who is at risk?</b>
+
+Column
+-----------------------------------------
+
+### Summary
+
+Lutherans:
+
+Transgender people who attempt to use public toilets and other facilities are frequently subjected to verbal harassment, physical and sexual assault, forcible removal (and even arrest) by police. This danger confronts not only trans people who use the facility corresponding to their gender identity, but also, and equally, to those who find themselves forced, by a "bathroom bill", to use a facility corresponding to their "assigned at birth" gender. In short, bathroom bills make it both humiliating and potentially dangerous for transgender people to use any public toilet at all. Fear and avoidance of using public toilets have resulted in social and physical distress for many transgender people, who simply need a safe place to tend to basic needs.[herman]
+
+Lutherans:
+
+These claims are simply not rooted in fact. More than 200 cities and 18 states across America have already passed similar non-discrimination laws—and implemented them successfully. These places have not experienced the terrible things that opponents of this bill claimed would happen. Such "bathroom panic" claims have been debunked many times over.[mediamatters]
+
+Despite overwhelming evidence, many media outlets continue to uncritically repeat the debunked myth peddled by anti-LGBT groups.[mediamatters]
+
+#### actively harms trans people
+
+Omleas I:
+#### how well identification
+
+Some anti-trans activists claim that cis people can 100% positively identify both trans women and trans men, without falsely identifying any trans people as cis or any cis people as trans, but this is very quickly proven false in practice. Androgynous people, masculine-looking cis women and feminine-looking cis men exist, and hormone replacement therapy can drastically change how a person looks.
+
+##### Bathroom bills are a transphobic scare tactic. They manipulate the public by using the spectre of highly charged, extreme situations that would never actually arise in real life
+
+##### Here, the policing approach disproportionately harms all women who are unable to meet the standards of normative cis, white, straight womanhood. ... Those who try to legislate what authentic womanhood is are always doing so via their own norms and biases, and in a white-centric, cis-centric, hetero-centric society, those who do not meet those descriptors will slowly be pushed out.
+
+
+##### Assumptions that black women are nonfeminine have been firmly embedded throughout US history. 
+
+Statistics documenting transgender people's experience of sexual violence indicate shockingly high levels of sexual abuse and assault. One in two transgender individuals are sexually abused or assaulted at some point in their lives. Some reports estimate that transgender survivors may experience rates of sexual assault up to 66 percent, often coupled with physical assaults or abuse. This indicates that the majority of transgender individuals are living with the aftermath of trauma and the fear of possible repeat victimization.[ovc]
+
+The 2015 U.S. Transgender Survey found that 47% of transgender people are sexually assaulted at some point in their lifetime.
+
+Further, some "masculine looking" women have been denied access and harassed or beaten out of the same fear[^1].
+
+* All means to detect trans people using their physical attributes and/or mannerisms are flawed because there is more than enough variation in the population to make robust identification impossible. For example: tall cis women exist. Cis women with above-average size feet exist. Some cis women have deep voices. And so on.
+* Using simple high-school maths, we have demonstrated that any regulation intended to "protect" single-sex spaces from trans women will have the exact opposite effect because cis women will be disproportionately afflicted by it.
+* Scenarios in which this is not the case are infeasible because the required performances are extremely unlikely to be achievable. 
+* The required performances are not achievable with AI: present-day computer vision systems from Amazon, Clarifai, Microsoft, and others are consistently poor at identifying transgender people and misidentify trans men and women 38% of the time[^7].
+* People are not as good as they they might think they are at identifying trans women. People will make mistakes. Women will be denied access to facilities, harassed or beaten. The majority of these women will be cis. This is a mathematical certainty.
+* There is plenty of evidence that supports the assertion that bathroom bills and regulations to protect single-sex spaces are not needed. There is simply no reason to be concerned about sharing toilets and other facilities with transgender people.
+* Transgender men and women shouldn't have to worry about violence or harassment when deciding where to relieve themselves, and they shouldn't have to spend more than a millisecond figuring out which toilet to use.
+
+<b>Which gender is more concerned about transgender women in female bathrooms?</b>
+
+A 2017 study gauging public opinion about safety and privacy when trans women use female bathrooms found that non-trans men are 1.55 times more likely to express concern about safety and privacy than non-trans women. Moreover, the study found that when expressing concern non-trans women are around four times as likely than non-trans men to assert that trans women do not directly cause their safety and privacy concerns. Non-trans men were found to be around 1.5 times as likely as non-trans women to assert that trans women directly cause their safety and privacy concerns. Essentially, the study found that it is mostly non-trans men --- *not women* --- who are concerned about safety and privacy when trans women use female bathrooms. This suggests that the instigators for policing women's spaces are chiefly non-trans men. [stones]
+
+
+From a scientific and evidence-based perspective, there is no current evidence that granting transgender individuals access to gender-corresponding restrooms results in an increase in sexual offenses.[Sorrentino]
+
+
+Irrational fears of trans women leads to harassment of everyone that doesn't conform to rigidly held western beauty standards.
+
+If bathroom bills are brought in, without a doubt, cis women who don't conform to the feminine standards of society will be subjected to harassment and attacks by self-appointed toilet monitors.
+
+
+Column
+-----------------------------------------
+
+### Here's the truth about the anti-LGBT "bathroom predator" myth
+
+```{r video}
+embed_youtube("vo42M8MdznY")
+```
+
+> YouTube video posted 12 April 2016 by Media Matters for America, shortly after North Carolina passed the Public Facilities Privacy & Security Act (HB2), which was partially repealed on 30 March 2017.
+
+### References and suggested further reading
+
+1. Flores, Andrew (June 2016). [How Many Adults Identify as Transgender in the United States (PDF)](http://williamsinstitute.law.ucla.edu/wp-content/uploads/How-Many-Adults-Identify-as-Transgender-in-the-United-States.pdf). Williams Institute UCLA School of Law.
+
+2. Collin L, Reisner SL, Tangpricha V, Goodman M. "...Results: Thirty-two studies met the inclusion criteria for systematic review. Of those, 27 studies provided necessary data for a meta-analysis. Overall mP [meta-prevalence] estimates per 100,000 population were 9.2 (95% CI = 4.9–13.6) for surgical or hormonal gender affirmation therapy and 6.8 (95% CI = 4.6–9.1) for transgender-related diagnoses. Of studies assessing self-reported transgender identity, the mP was 871 (95% CI = 519–1,224); however, this result was influenced by a single outlier study. After removal of that study, the mP changed to 355 (95% CI = 144–566)." in [Prevalence of Transgender Depends on the "Case" Definition: A Systematic Review](https://www.sciencedirect.com/science/article/abs/pii/S1743609516001338), Journal of Sexual Medicine, Volume 13, Issue 4, April 2016, Pages 613-626.
+
+3. Glen, Fiona; Hurrell, Karen (2012). [Technical note: Measuring Gender Identity (PDF)](https://www.equalityhumanrights.com/sites/default/files/technical_note_final.pdf). Equality and Human Rights Commission. Retrieved 30 May 2019.
+
+4. [Trans People in the UK](https://web.archive.org/web/20210215174909/https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/721642/GEO-LGBT-factsheet.pdf). Government Equalities Office. Archived from [the original](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/721642/GEO-LGBT-factsheet.pdf) on 15 February 2021. ISBN: 978-1-78655-673-8
+
+5. [Population estimates for the UK, England and Wales, Scotland and Northern Ireland: mid-2018](https://web.archive.org/web/20201227035457/https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualmidyearpopulationestimates/mid2018). Office for National Statistics. Archived from [the original](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualmidyearpopulationestimates/mid2018) on 27 December 2020.
+
+6. Meerwijk EL, Sevelius JM. [Transgender Population Size in the United States: a Meta-Regression of Population-Based Probability Samples](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5227946). Am J Public Health. 2017;107(2):e1-e8. doi:10.2105/AJPH.2016.303578
+
+7. Butler, Tijen (April 2019). [What percentage of the US population is transgender?](https://web.archive.org/web/20210207202417/https://www.pinknews.co.uk/2019/04/02/percentage-us-population-transgender-statistics/). PinkNews. Archived from [the original](https://www.pinknews.co.uk/2019/04/02/percentage-us-population-transgender-statistics/) on 7 February 2021.
+
+8. [Accelerating Acceptance 2017](https://web.archive.org/web/20210206063651/https://www.glaad.org/files/aa/2017_GLAAD_Accelerating_Acceptance.pdf). GLAAD. Archived from [the original](https://www.glaad.org/files/aa/2017_GLAAD_Accelerating_Acceptance.pdf) on 6 February 2021.
+
+9. Jones, Jeffrey M. (February 2021). [LGBT Identification Rises to 5.6% in Latest U.S. Estimate](https://web.archive.org/web/20210224194441/https://news.gallup.com/poll/329708/lgbt-identification-rises-latest-estimate.aspx). Gallup. Archived from [the original](https://news.gallup.com/poll/329708/lgbt-identification-rises-latest-estimate.aspx) on 24 February 2021.
+
+10. McCarthy, Justin (June 2019). [Gallup First Polled on Gay Issues in '77. What Has Changed?](https://web.archive.org/web/20210224174022/https://news.gallup.com/poll/258065/gallup-first-polled-gay-issues-changed.aspx). Gallup. Archived from [the original](https://news.gallup.com/poll/258065/gallup-first-polled-gay-issues-changed.aspx) on 24 February 2021.
+
+11. [Common Core State Standards for Mathematics](https://web.archive.org/web/20210224120217/http://www.corestandards.org/assets/CCSSI_Math%20Standards.pdf). Common Core
+State Standards Initiative. Archived from [the original](http://www.corestandards.org/assets/CCSSI_Math%20Standards.pdf) on 24 February 2021.
+
+12. [National curriculum in England: mathematics programmes of study](https://web.archive.org/web/20201101122351/https://www.gov.uk/government/publications/national-curriculum-in-england-mathematics-programmes-of-study/national-curriculum-in-england-mathematics-programmes-of-study). Department for Education. Archived from [the original](https://www.gov.uk/government/publications/national-curriculum-in-england-mathematics-programmes-of-study/national-curriculum-in-england-mathematics-programmes-of-study) on 1 November 2020.
+
+13. Scheuerman, Morgan Klaus and Paul, Jacob M. and Brubaker, Jed R. [How Computers See Gender: An Evaluation of Gender Classification in Commercial Facial Analysis Services](https://dl.acm.org/doi/10.1145/3359246), Proceedings of the ACM on Human-Computer Interaction, Volume 3, Article 144, November 2019.
+
+14. [Bayes' theorem](https://web.archive.org/web/20210224183157if_/https://en.wikipedia.org/wiki/Bayes%27_theorem). Wikipedia. Archived from [the original](https://en.wikipedia.org/wiki/Bayes%27_theorem) on 24 February 2021.
+
+15. Bayes Thomas. 1763 LII. [An essay towards solving a problem in the doctrine of chances](https://royalsocietypublishing.org/doi/10.1098/rstl.1763.0053). By the late Rev. Mr. Bayes, F. R. S. communicated by Mr. Price, in a letter to John Canton, A. M. F. R. S. *Phil. Trans. R. Soc.* **53**:370–418. [https://doi.org/10.1098/rstl.1763.0053](https://doi.org/10.1098/rstl.1763.0053)
+
+
+*****
+
+1. Eko, Hannah (February 2018). [As A Black Woman, I'm Tired Of Having To Prove My Womanhood](https://web.archive.org/web/20210127000418/https://www.buzzfeednews.com/article/hannaheko/aint-i-a-woman). BuzzFeed News. Archived from [the original](https://www.buzzfeednews.com/article/hannaheko/aint-i-a-woman) on 27 January 2021.
+
+
+
+1. Stones, R.J. [Which Gender is More Concerned About Transgender Women in Female Bathrooms?](https://link.springer.com/article/10.1007/s12147-016-9181-6#citeas). Gend. Issues 34, 275–291 (2017). [https://doi.org/10.1007/s12147-016-9181-6](https://doi.org/10.1007/s12147-016-9181-6)
+
+1. [Responding to Transgender Victims of Sexual Assault](https://web.archive.org/web/20210209181550/https://ovc.ojp.gov/sites/g/files/xyckuh226/files/pubs/forge/sexual_numbers.html).  Office for Victims of Crime, U.S. Department of Justice. Archived from [the original](https://ovc.ojp.gov/sites/g/files/xyckuh226/files/pubs/forge/sexual_numbers.html) on 9 February 2021.
+
+1. James, S. E., Herman, J. L., Rankin, S., Keisling, M., Mottet, L., & Anafi, M. (2016). [The Report of the 2015 U.S. Transgender Survey](https://web.archive.org/web/20210224090749/https://www.transequality.org/sites/default/files/docs/USTS-Full-Report-FINAL.PDF). Washington, DC: National Center for Transgender Equality. Archived from [the original](https://www.transequality.org/sites/default/files/docs/USTS-Full-Report-FINAL.PDF) on 24 February 2021.
+
+1. [Single-Sex Spaces: A Convenient Myth](https://web.archive.org/web/20201003230205/https://omelas.co.uk/2020/01/27/single-sex-spaces-unpicking-a-convenient-myth/). Archived from [the original](https://omelas.co.uk/2020/01/27/single-sex-spaces-unpicking-a-convenient-myth/) on 3 October 2020.
+
+1. Herman, Jody (June 2013). [Gendered Restrooms and Minority Stress: The Public Regulation of Gender and its Impact on Transgender People's Lives](https://web.archive.org/web/20161222160345/https://williamsinstitute.law.ucla.edu/wp-content/uploads/Herman-Gendered-Restrooms-and-Minority-Stress-June-2013.pdf). Williams Institute UCLA School of Law. Archived from [the original](http://williamsinstitute.law.ucla.edu/wp-content/uploads/Herman-Gendered-Restrooms-and-Minority-Stress-June-2013.pdf) on 22 December 2016.
+
+1. Fitzgerald, Erin (May 2016). [A Comprehensive Guide To The Debunked "Bathroom Predator" Myth](https://web.archive.org/web/20210211225809/https://www.mediamatters.org/sexual-harassment-sexual-assault/comprehensive-guide-debunked-bathroom-predator-myth). Media Matters for America. Archived from [the original](https://www.mediamatters.org/sexual-harassment-sexual-assault/comprehensive-guide-debunked-bathroom-predator-myth) on 11 February 2021.
+
+1. [Bathroom Bills: Frequently Asked Questions](https://www.reconcilingworks.org/resources/injustice/bathroomfaqs/)
+
+
+
+
+
+
+
+6. Landén, M., Wålinder, J., Lundstrom, B. (1996) "...Results: During the 20-year period of the study, 233 requests for sex reassignment were processed, and the incidence data were calculated on the basis of this group. This means that the average annual frequency was 11.6 cases. The number of inhabitants in Sweden over 15 years of age increased during the study period from 6.5 million to 7.1 million, i.e. there was a mean population of 6.8 million (12), which gives an annual incidence of request for sex reassignment of 0.17 per 100,000 inhabitants. The sex ratio (male:female) is 1.4:1. To resolve the question of whether transsexualism increases or decreases, we divided the group into two 10-year periods. As can be seen from Table 1, not only do our results agree with the Swedish incidence data published in the 1970s, but also they remain remarkably stable over time. Separating from all applications the group with primary transsexualism yielded 188 cases, i.e. 9.4 cases annually. As is shown in Table 2, this corresponds to an incidence of primary transsexualism of 0.14 per 100,000 inhabitants over 15 years of age. It should also be noted that primary transsexualism is equally common in women and men..." in [Incidence and sex ratio of transsexualism in Sweden](https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1600-0447.1996.tb10645.x) from [Acta Psychiatrica Scandanavica](https://onlinelibrary.wiley.com/journal/16000447), Volume 93, pages 261-263.
+
+
+
+8. Brian S. Barnett, Ariana E. Nesbit, Renée M. Sorrentino, [The Transgender Bathroom Debate at the Intersection of Politics, Law, Ethics, and Science](http://jaapl.org/content/46/2/232), Journal of the American Academy of Psychiatry and the Law Online, June 2018, 46 (2) 232-241.
+
+9. Coulter RWS, Mair C, Miller E, Blosnich JR, Matthews DD, McCauley HL. [Prevalence of Past-Year Sexual Assault Victimization Among Undergraduate Students: Exploring Differences by and Intersections of Gender Identity, Sexual Identity, and Race/Ethnicity](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5511765/) Prev Sci. 2017;18(6):726-736. doi:10.1007/s11121-017-0762-8
+
+
+
+```{r reproducibility}
+# - Session info ---------------------------------------------------------------
+#  setting  value                       
+#  version  R version 3.6.1 (2019-07-05)
+#  os       Windows 10 x64              
+#  system   x86_64, mingw32             
+#  ui       RStudio                     
+#  language (EN)                        
+#  collate  English_United Kingdom.1252 
+#  ctype    English_United Kingdom.1252 
+#  tz       Europe/Prague               
+#  date     2021-02-18                  
+# 
+# - Packages -------------------------------------------------------------------
+#  package       * version date       lib source        
+#  assertthat      0.2.1   2019-03-21 [1] CRAN (R 3.6.3)
+#  cachem          1.0.3   2021-02-04 [1] CRAN (R 3.6.3)
+#  callr           3.5.1   2020-10-13 [1] CRAN (R 3.6.3)
+#  cli             2.3.0   2021-01-31 [1] CRAN (R 3.6.3)
+#  colorspace      2.0-0   2020-11-11 [1] CRAN (R 3.6.3)
+#  crayon          1.4.1   2021-02-08 [1] CRAN (R 3.6.3)
+#  desc            1.2.0   2018-05-01 [1] CRAN (R 3.6.3)
+#  devtools        2.3.2   2020-09-18 [1] CRAN (R 3.6.3)
+#  digest          0.6.27  2020-10-24 [1] CRAN (R 3.6.3)
+#  ellipsis        0.3.1   2020-05-15 [1] CRAN (R 3.6.3)
+#  evaluate        0.14    2019-05-28 [1] CRAN (R 3.6.3)
+#  fastmap         1.1.0   2021-01-25 [1] CRAN (R 3.6.3)
+#  flexdashboard   0.5.2   2020-06-24 [1] CRAN (R 3.6.3)
+#  formattable     0.2.1   2021-01-07 [1] CRAN (R 3.6.3)
+#  fs              1.5.0   2020-07-31 [1] CRAN (R 3.6.3)
+#  glue            1.4.2   2020-08-27 [1] CRAN (R 3.6.3)
+#  htmltools       0.5.1.1 2021-01-22 [1] CRAN (R 3.6.3)
+#  htmlwidgets     1.5.3   2020-12-10 [1] CRAN (R 3.6.3)
+#  jsonlite        1.7.2   2020-12-09 [1] CRAN (R 3.6.3)
+#  knitr           1.31    2021-01-27 [1] CRAN (R 3.6.3)
+#  lifecycle       0.2.0   2020-03-06 [1] CRAN (R 3.6.3)
+#  magrittr        2.0.1   2020-11-17 [1] CRAN (R 3.6.3)
+#  memoise         2.0.0   2021-01-26 [1] CRAN (R 3.6.3)
+#  munsell         0.5.0   2018-06-12 [1] CRAN (R 3.6.3)
+#  pkgbuild        1.2.0   2020-12-15 [1] CRAN (R 3.6.3)
+#  pkgload         1.1.0   2020-05-29 [1] CRAN (R 3.6.3)
+#  prettyunits     1.1.1   2020-01-24 [1] CRAN (R 3.6.3)
+#  processx        3.4.5   2020-11-30 [1] CRAN (R 3.6.3)
+#  ps              1.5.0   2020-12-05 [1] CRAN (R 3.6.3)
+#  purrr           0.3.4   2020-04-17 [1] CRAN (R 3.6.3)
+#  R6              2.5.0   2020-10-28 [1] CRAN (R 3.6.3)
+#  remotes         2.2.0   2020-07-21 [1] CRAN (R 3.6.3)
+#  rlang           0.4.10  2020-12-30 [1] CRAN (R 3.6.3)
+#  rmarkdown       2.6     2020-12-14 [1] CRAN (R 3.6.3)
+#  rprojroot       2.0.2   2020-11-15 [1] CRAN (R 3.6.3)
+#  scales          1.1.1   2020-05-11 [1] CRAN (R 3.6.3)
+#  sessioninfo     1.1.1   2018-11-05 [1] CRAN (R 3.6.3)
+#  testthat        3.0.1   2020-12-17 [1] CRAN (R 3.6.3)
+#  usethis         2.0.1   2021-02-10 [1] CRAN (R 3.6.3)
+#  withr           2.4.1   2021-01-26 [1] CRAN (R 3.6.3)
+#  xfun            0.20    2021-01-06 [1] CRAN (R 3.6.3)
+#  yaml            2.2.1   2020-02-01 [1] CRAN (R 3.6.3)
+ ```
+
+```{r}
+# %%%###(((#(%@@@@@@@%#((//((/#(((((((#%%&%%&%%%%####(%#((#######(##((##(###%%%#%#
+# %%%%%####/(&@@@@@@@@(((#(((((((/((%&&&%%%%%%%%#%%#%#&#%####((###(((#(#(#((((#(##
+# %%###(((((#%@@@@@@@@#(##((@@@@@@&@@@@@@@@@@&&&&%%%&%&%&#%###(###########((((#(((
+# %&%%#%((#(%%@@@@@@@@%(###&@@&&@@@@@@@@@@@@@@@@@@@&&%&#%(#(#(&@@@@%%#(#(#((((((((
+# %%%#%(#(///&@@@@@@@@@##&&@@@@&&@@@@@@@@@@@@@@@@@@@&&%((/(&@@@&&&@@#%%#(((#/(#%#%
+# %%%%%(%(%%#%&@@@@@@@@@@@@@&&&%&&@@@@@@@@@@@@@@@@@@@@&%(&@@@@&&&&&@#%###&#&(##(##
+# %%%%%&%#%((#&@@@@@@@@@@@@@&&&%%%&@@@@@@@@@@@@@@@@@@@@@@@@&&#%#&&@@(%((##(&#%####
+# %%%#%%###%##&@@@@@@@@@@@@&&&&&&%%&&@@@@@@@@@@@@@@@@@@@@@&%%%%%&&@@(%(####%%%##%%
+# %%%%%#(###((#&@@@@@@@@@@@@&&#&&@@&@@@@@@@&&&&&&&@@@&@@@%%%#%%&&@@/(((((####%%%%%
+# %#%###(#%%(#(#&&@&&@@@@@@@&&&@@&@@%@@@@@@@&&&&@@@@@@@%@@@@%&&&&@(((((((##%####%%
+# %%##&%########%&@@@@@@@@@@@@%@@@@(&#@@@&%#@@@@@@&@@#@@%@@&&&&&&&##(((###(#(##%##
+# ((#%%#&((((%#(%%@@@@@@@@@@@@@&&@@%&&@&%%**(&@@@@@#&#@%@@@@@@@@@%((((((###(#(####
+# #(##%%%%%##%#%#@@@@@@@@@@@@@@@@@@@@&&&#.  /#&@@@@@@%@@@@@@@@@@@##(##(####((#####
+# #(((#%##&#%#(%@@@@@@@@@@@@@@&%&@@@@@&%,.  ,#&@@@@@@@@@@@@@@@@@@#((#(##%#%#######
+# #(#(##(%##%#%%@@@@@@@@@@@@@@&(&&&%(&@#,.  ./%@@@&@&&&&@@@@@@@@@######%&#%%%%%###
+# ((((((#(#%%%&&@@@@@@@@@@@@@@@&#/(%&&#,...  .#&&##%%&&/@&@@@@@&&%##(%#####%%%%###
+# ,,##%%%%%%%%%&@@@@&&&@&@@@@@@@@@&&&,,.       &&&@#*/%@@@@@&&&&&##(###%%%%%%%%%%#
+# ,*//%#%%%%%%%%&%&@@@@&&@@&&&&&#(,..,,....  .. */&@@@@@@&@@&&&&####%%%##%%%%%&%%#
+# /////(%%%%#%%#&@@@@@@&#*&&**/*,,..,**,.......   ,/(%&&@@@@&&&*/(%%%&%%%&####%###
+# ///////(%%%%%%&&@@@@@&#,,,*/,,,,*,,,*(//#(*..    .*((%%@@@&(,..(&%&%%%%&%%%##(#(
+# &&/**////(##(##%@@@@@@#,,,**********//((*,,,,,,....*///*/,...../%#%#%%#&%%#%####
+# ////****///(#%%%&#&@@#%*,,,,,****//((###(//***,,,,,****,......*(#%%%%%%%#%%%%#%%
+# /////&*,,*//((#%(%(&&@&/,,,,******///////////******/,,,......./#%%%###%##%%#%%%%
+# //////*/,,,*///(##&%(&&%#*,,*******//////////**/,*,*,,.,,....//#%%%##%####%#%%%%
+# //////*****,,*//((%&&&&%#/*************/////*****,,,,,*,,,..*#(%%####((/##(%%%%%
+# ////////*/***,,*//((#%%(%((*****//*****/////********,****,*(#%%%#%#(##((%%%%&%%%
+# *************//,,**/(((%#%%#(****/////////////***********#&%%((%%%%###%#%&%%&&%%
+# **********/***//&,,*/((#(%#%%#((***////*/*********,***/#%&&&%%%(%#(%#%%%%%%&%%%%
+# ****************/&&,**/((((#&%%%#*******************#%&&&&&&&%&%%%#%#%##%%%%%%%%
+# ******************##&*,*/(((((%***,**////#((//***,..#&%&%&&&%&%&&%%%#%%%#%%%#%%%
+# ******************/***/,**/(///********/&&&&(/*,...,#%%%%%%%%%%%#&&&%&%%%%%%%%%%
+# ******************/******,,//////**//(%&&%&&&%(//*//#//%##&#%%%%%&%%%%%%%%%%%%%%
+```
+
+
