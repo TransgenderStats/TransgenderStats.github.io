@@ -58,17 +58,19 @@ require(formattable) # For nicely formatted numbers
 require(vembedr) # For embedding videos
 ```
 
-```{r setup, include=FALSE}
+```{r header, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE )
 # Create header.html
 fileConn <- file("header.html")
-writeLines('<meta name="twitter:card" content="summary"></meta>', fileConn)
-writeLines('<meta name="twitter:site" content="@TransgenderStat" />', fileConn)
-writeLines('<meta name="twitter:creator" content="@PropertyOfMyCat" />', fileConn)
-writeLines('<meta property="og:url" content="https://TransgenderStats.github.io/BathroomBills/" />', fileConn)
-writeLines('<meta property="og:title" content="Why bathroom bills are a problem for all women" />', fileConn)
-writeLines('<meta property="og:description" content="Why \"protecting\" single-sex spaces has no practical benefit for women" />', fileConn)
-writeLines('<meta property="og:image" content="https://TransgenderStats.github.io/BathroomBills/preview.jpg" />', fileConn)
+c('<meta name="twitter:card" content="summary"></meta>',
+  '<meta name="twitter:site" content="@TransgenderStat" />',
+  '<meta name="twitter:creator" content="@PropertyOfMyCat" />',
+  '<meta property="og:url" content="https://TransgenderStats.github.io/BathroomBills/" />',
+  '<meta property="og:title" content="Why bathroom bills are a problem for all women" />',
+  '<meta property="og:description" content="Why \"protecting\" single-sex spaces has no practical benefit for women" />',
+  '<meta property="og:image" content="https://TransgenderStats.github.io/BathroomBills/preview.jpg" />'
+) %>% 
+  writeLines(fileConn)
 close(fileConn)
 ```
 
