@@ -540,7 +540,7 @@ fig2
 
 > Move your mouse pointer over the plot to see the probabilities for mistaken identifications and correct identifications.
 
-Column {data-width=250}
+Column {data-width=220}
 -----------------------------------------
 
 ### How to use and interpret
@@ -575,7 +575,7 @@ In this section:<br>
 
 <a name="intro"></a><b>What is a bathroom bill?</b>
 
-A "bathroom bill" is the common name for legislation that requires people to use toilets and other sex-segregated public facilities that correspond to the sex listed on their birth certificates. Supporters of bathroom bills say that these laws are needed to protect "single-sex spaces". This is a term that is usually used to mean "women's spaces". Bathroom bills specifically prohibit transgender people from using toilets and single-sex facilities that align with their gender identity. Transgender (often shortened to *trans*) is a term referring to people who identify as a gender other than the one they were assigned at birth. Supporters of bathroom bills tend to focus on people assigned male at birth who later transition to female and say that without these laws, sexual predators could easily say that they are a trans woman with the right to use a women's bathroom to gain access to potential victims.<a href="#top1">↩</a>
+A "bathroom bill" is the common name for legislation that requires people to use toilets and other sex-segregated public facilities that correspond to the sex listed on their birth certificates. Supporters of bathroom bills say that these laws are needed to protect "single-sex spaces". This is a term that is usually used to mean "women's spaces". Bathroom bills specifically prohibit transgender people from using toilets and single-sex facilities that align with their gender identity. Transgender (often shortened to "trans") is a term referring to people who identify as a gender other than the one they were assigned at birth. Supporters of bathroom bills tend to focus on people assigned male at birth who later transition to female and say that without these laws, sexual predators could easily say that they are a trans woman with the right to use a women's bathroom to gain access to potential victims.<a href="#top1">↩</a>
 
 *****
 
@@ -752,11 +752,11 @@ P(-|\mathrm{trans}) = 0.01
 $$
 $P$ denotes a probability, and the vertical bar "$|$" means "given", so we can read the above as: "the probability that someone is positively identified, given that they are trans, is 0.99 (99%), and the probability that someone is negatively identified, given that they are trans, is 0.01 (1%)". This is equivalent to the statement that 99 out of a hundred trans people can be correctly identified as trans, and that one person who is actually trans will be mistaken as not trans. We say that the *true positive rate* is 99% and the *false negative rate* is 1%. These are all equivalent statements.
 
-We're also interested in what the probability is that a person is negatively identified, given that the person is in fact not trans. This is not necessarily equal to the accuracy for identifying a trans person. We may hypothesise that it may be easier to identify one group of people than the other. Let's assume that the probability that a person is negatively identified, given that they are indeed not trans, is 97%; it then follows that the probability of getting the wrong result (positively identification) is 3%:
+We're also interested in what the probability is that a person is negatively identified, given that the person is in fact not trans. This is not necessarily equal to the accuracy for identifying a trans person. We may hypothesise that it may be easier to identify one group of people than the other. For notational convenience we'll introduce some new terminology that will make our equations shorter and easier to read: we'll use the term "cis" to replace the more cumbersome "not trans". Cisgender is a term for people whose gender identity matches their sex assigned at birth. Cisgender has its origin in the Latin-derived prefix cis-, meaning "on this side of", which is the opposite of trans-, meaning "across from" or "on the other side of". Let's assume that the probability that a person is negatively identified, given that they are indeed not trans, is 97%; it then follows that the probability of getting the wrong result (positively identification) is 3%:
 
 $$
-P(-|\mathrm{not~trans}) = 0.97,~\\
-P(+|\mathrm{not~trans}) = 0.03
+P(-|\mathrm{cis}) = 0.97,~\\
+P(+|\mathrm{cis}) = 0.03
 $$
 This means that 97 out of a hundred people who are not trans can be correctly identified as not trans, and three people who are not trans will be mistaken as trans. We say that the *true negative rate* is 97% and the *false positive rate* is 3%. 
 
@@ -764,13 +764,13 @@ We know that the prevalence of trans people in the general population is very sm
 
 $$
 P(\mathrm{trans}) = 0.0058,~\\
-P(\mathrm{not~trans}) = 0.9942
+P(\mathrm{cis}) = 0.9942
 $$
 
 This information is all we need, and is summarised on the probability tree diagram. Moving the mouse pointer over a node will trigger a pop-up display of the probability of the event represented by that node. Here are the probabilities for the four possible outcomes:
 
- * Not trans and identified as not trans: $P(-|\textrm{not trans})P(\textrm{not trans}) = 97\% \times 99.42\% = 96.44\%\\$
- * Not trans and identified as trans: $P(+|\textrm{not trans})P(\textrm{not trans}) = 3\% \times 99.42\% = 2.98\%\\$
+ * Not trans and identified as not trans: $P(-|\textrm{cis})P(\textrm{cis}) = 97\% \times 99.42\% = 96.44\%\\$
+ * Not trans and identified as trans: $P(+|\textrm{cis})P(\textrm{cis}) = 3\% \times 99.42\% = 2.98\%\\$
  * Trans and identified as trans: $P(+|\textrm{trans})P(\textrm{trans}) = 99\% \times 0.58\% = 0.57\%\\$
  * Trans and identified as not trans: $P(-|\textrm{trans})P(\textrm{trans}) = 1\% \times 0.58\% = 0.01\%$
 
@@ -783,11 +783,11 @@ For the conditional probability $P(\mathrm{trans}|+)$, we know there was a posit
 Let's say that someone enters a public toilet or single-sex facility and they are judged to be trans by other users of the facility. What is the probability that they are actually trans? We can imagine repeating this experiment many times and measuring what happens. Calculating $P(\mathrm{trans}|+)$ is equivalent to calculating the percentage of people who were identified as trans who are actually trans. The two outcomes that result in a positive identification are:
 
  * Trans and identified as trans: $P(+|\textrm{trans})P(\textrm{trans}) = 99\% \times 0.58\% = 0.57\%\\$
- * Not trans and identified as trans: $P(+|\textrm{not trans})P(\textrm{not trans}) = 3\% \times 99.42\% = 2.98\%$
+ * Not trans and identified as trans: $P(+|\textrm{cis})P(\textrm{cis}) = 3\% \times 99.42\% = 2.98\%$
 
 The probability that either of these events occur is the sum of their individual probabilities:
 $$
-P(+|\textrm{trans})P(\textrm{trans}) + P(+|\textrm{not trans})P(\textrm{not trans})
+P(+|\textrm{trans})P(\textrm{trans}) + P(+|\textrm{cis})P(\textrm{cis})
 $$
 We're interested in the outcome in which a trans person is observed and they are identified as trans, which occurs with probability:
 $$
@@ -795,7 +795,7 @@ P(+|\textrm{trans})P(\textrm{trans})
 $$
 Therefore, the fraction (or percentage) of those identified as trans who are actually trans is:
 $$
-P(\mathrm{trans}|+) = \frac{P(+|\textrm{trans})P(\textrm{trans})}{P(+|\textrm{trans})P(\textrm{trans}) + P(+|\textrm{not trans})P(\textrm{not trans})}
+P(\mathrm{trans}|+) = \frac{P(+|\textrm{trans})P(\textrm{trans})}{P(+|\textrm{trans})P(\textrm{trans}) + P(+|\textrm{cis})P(\textrm{cis})}
 $$
 As an aside, this is just a specialised case of [Bayes' Theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem)$^{14}$:
 $$
@@ -806,21 +806,21 @@ Bayes' Theorem allows us to make probability calculations of the form: what is t
 For our specific example, we have:
 
 \begin{align}
-P(\mathrm{trans}|+) &= \frac{P(+|\mathrm{trans})P(\mathrm{trans})}{P(+|\mathrm{trans})P(\mathrm{trans})+P(+|\mathrm{not~trans})P(\mathrm{not~trans})}\\ &\\ &= \frac{0.99\times0.0058}{0.99\times0.0058 + 0.03\times0.9942}\\ &\\ &= 0.161
+P(\mathrm{trans}|+) &= \frac{P(+|\mathrm{trans})P(\mathrm{trans})}{P(+|\mathrm{trans})P(\mathrm{trans})+P(+|\mathrm{cis})P(\mathrm{cis})}\\ &\\ &= \frac{0.99\times0.0058}{0.99\times0.0058 + 0.03\times0.9942}\\ &\\ &= 0.161
 \end{align}
 
 So the probability that a person is trans, given that they were recognised as trans, is only 16.1%. This may seem surprising, given the 99% accuracy to identify trans people. The result is small because the prevalence of trans people in the population is so tiny.
 
-Similarly, the probability that a person is not trans, given they were positively identified, $P(\mathrm{not~trans}|+)$, is:
+Similarly, the probability that a person is not trans, given they were positively identified, $P(\mathrm{cis}|+)$, is:
 
 \begin{align}
-P(\mathrm{not~trans}|+) &= \frac{P(+|\mathrm{not~trans}) P(\mathrm{not~trans})}{P(+|\mathrm{not~trans}) P(\mathrm{not~trans}) + P(+|\mathrm{trans}) P(\mathrm{trans})}\\ &\\ &= \frac{0.03\times0.9942}{0.03\times0.9942 + 0.99\times0.0058}\\ &\\ &= 0.839
+P(\mathrm{cis}|+) &= \frac{P(+|\mathrm{cis}) P(\mathrm{cis})}{P(+|\mathrm{cis}) P(\mathrm{cis}) + P(+|\mathrm{trans}) P(\mathrm{trans})}\\ &\\ &= \frac{0.03\times0.9942}{0.03\times0.9942 + 0.99\times0.0058}\\ &\\ &= 0.839
 \end{align}
 
 We can check our result by noting that if a person has been positively identified, the only alternative to the outcome in which they are not trans is the outcome in which they are trans, therefore:
 
 $$
-P(\mathrm{not~trans}|+) = 1 - P(\mathrm{trans}|+) = 1 - 0.161 = 0.839.
+P(\mathrm{cis}|+) = 1 - P(\mathrm{trans}|+) = 1 - 0.161 = 0.839.
 $$
 Thus we have shown that women who are not trans will be misidentified as trans 83.9% of the time. **In this scenario, five times more women that are not trans are misidentified as trans than trans women are correctly identified!**
 
@@ -833,17 +833,17 @@ How dependent is our previous result on our choice of numbers? We'd like to make
 The inputs to our analysis are: 
 
 * $P(+|\mathrm{trans})$, the probability that a trans person is judged to be trans (the true positive rate), 
-* $P(-|\mathrm{not~trans})$, the probability that a person who is not trans is judged to be not trans (the true negative rate),
+* $P(-|\mathrm{cis})$, the probability that a person who is not trans is judged to be not trans (the true negative rate),
 * $P(\mathrm{trans})$, the prevalence of trans people in the population.
 
 Just as a reminder: the first two listed above may be equal, but there is no requirement for them to be so. Also, the prevalence of trans people in the population is uncertain, but not completely unknown, and importantly we know the number is very small.
 
-Let's see what happens when we try different values of $P(+|\mathrm{trans})$ and $P(-|\mathrm{not~trans})$. Let's assume that it is possible to accurately identify trans people at least 50% of the time, and similarly for people who are not trans, which is at least what would be expected from flipping a fair coin to predict someone's gender identity. Consequently, $P(+|\mathrm{trans})$ and $P(-|\mathrm{not~trans})$ both range between 50% and 100%. How many more times will the people who are not trans be misidentified as trans than trans people are correctly identified? That is, we want to know:
+Let's see what happens when we try different values of $P(+|\mathrm{trans})$ and $P(-|\mathrm{cis})$. Let's assume that it is possible to accurately identify trans people at least 50% of the time, and similarly for people who are not trans, which is at least what would be expected from flipping a fair coin to predict someone's gender identity. Consequently, $P(+|\mathrm{trans})$ and $P(-|\mathrm{cis})$ both range between 50% and 100%. How many more times will the people who are not trans be misidentified as trans than trans people are correctly identified? That is, we want to know:
 
 $$
-\frac{P(\mathrm{not~trans}|+)}{P(\mathrm{trans}|+)}.
+\frac{P(\mathrm{cis}|+)}{P(\mathrm{trans}|+)}.
 $$
-Now let's consider *all possible scenarios* for any specified trans prevalence by assuming a continuum of values for $P(+|\mathrm{trans})$ and $P(-|\mathrm{not~trans})$. Each pair of values defines the accuracy with which people who are trans, and those who are not, can be identified. We can plot these values as points in a graph, $P(+|\mathrm{trans})$ on the horizontal axis and $P(-|\mathrm{not~trans})$ on the  vertical axis, and colour them by how many more times people who are not trans are misidentified than trans women are identified. We can also plot contour lines that can be annotated to show this information more clearly. This is how we obtained the plot on the first page.
+Now let's consider *all possible scenarios* for any specified trans prevalence by assuming a continuum of values for $P(+|\mathrm{trans})$ and $P(-|\mathrm{cis})$. Each pair of values defines the accuracy with which people who are trans, and those who are not, can be identified. We can plot these values as points in a graph, $P(+|\mathrm{trans})$ on the horizontal axis and $P(-|\mathrm{cis})$ on the  vertical axis, and colour them by how many more times people who are not trans are misidentified than trans women are identified. We can also plot contour lines that can be annotated to show this information more clearly. This is how we obtained the plot on the first page.
 
 When a trans person uses a public toilet, who is at risk? {data-navmenu="Menu"}
 =========================================
@@ -914,7 +914,14 @@ Column
 ```{r video}
 embed_youtube("vo42M8MdznY")
 ```
+> YouTube video posted 12 April 2016 by Media Matters for America, shortly after North Carolina passed the Public Facilities Privacy & Security Act (HB2), which was partially repealed on 30 March 2017.
 
+### Here's the truth about the anti-LGBT "bathroom predator" myth {.mobile}
+
+```{r mobile_video}
+# Smaller version for mobile:
+embed_youtube("vo42M8MdznY", width = 220)
+```
 > YouTube video posted 12 April 2016 by Media Matters for America, shortly after North Carolina passed the Public Facilities Privacy & Security Act (HB2), which was partially repealed on 30 March 2017.
 
 ### References and suggested further reading
@@ -988,62 +995,7 @@ State Standards Initiative. Archived from [the original](http://www.corestandard
 
 
 ```{r reproducibility}
-# - Session info ---------------------------------------------------------------
-#  setting  value                       
-#  version  R version 3.6.1 (2019-07-05)
-#  os       Windows 10 x64              
-#  system   x86_64, mingw32             
-#  ui       RStudio                     
-#  language (EN)                        
-#  collate  English_United Kingdom.1252 
-#  ctype    English_United Kingdom.1252 
-#  tz       Europe/Prague               
-#  date     2021-02-18                  
-# 
-# - Packages -------------------------------------------------------------------
-#  package       * version date       lib source        
-#  assertthat      0.2.1   2019-03-21 [1] CRAN (R 3.6.3)
-#  cachem          1.0.3   2021-02-04 [1] CRAN (R 3.6.3)
-#  callr           3.5.1   2020-10-13 [1] CRAN (R 3.6.3)
-#  cli             2.3.0   2021-01-31 [1] CRAN (R 3.6.3)
-#  colorspace      2.0-0   2020-11-11 [1] CRAN (R 3.6.3)
-#  crayon          1.4.1   2021-02-08 [1] CRAN (R 3.6.3)
-#  desc            1.2.0   2018-05-01 [1] CRAN (R 3.6.3)
-#  devtools        2.3.2   2020-09-18 [1] CRAN (R 3.6.3)
-#  digest          0.6.27  2020-10-24 [1] CRAN (R 3.6.3)
-#  ellipsis        0.3.1   2020-05-15 [1] CRAN (R 3.6.3)
-#  evaluate        0.14    2019-05-28 [1] CRAN (R 3.6.3)
-#  fastmap         1.1.0   2021-01-25 [1] CRAN (R 3.6.3)
-#  flexdashboard   0.5.2   2020-06-24 [1] CRAN (R 3.6.3)
-#  formattable     0.2.1   2021-01-07 [1] CRAN (R 3.6.3)
-#  fs              1.5.0   2020-07-31 [1] CRAN (R 3.6.3)
-#  glue            1.4.2   2020-08-27 [1] CRAN (R 3.6.3)
-#  htmltools       0.5.1.1 2021-01-22 [1] CRAN (R 3.6.3)
-#  htmlwidgets     1.5.3   2020-12-10 [1] CRAN (R 3.6.3)
-#  jsonlite        1.7.2   2020-12-09 [1] CRAN (R 3.6.3)
-#  knitr           1.31    2021-01-27 [1] CRAN (R 3.6.3)
-#  lifecycle       0.2.0   2020-03-06 [1] CRAN (R 3.6.3)
-#  magrittr        2.0.1   2020-11-17 [1] CRAN (R 3.6.3)
-#  memoise         2.0.0   2021-01-26 [1] CRAN (R 3.6.3)
-#  munsell         0.5.0   2018-06-12 [1] CRAN (R 3.6.3)
-#  pkgbuild        1.2.0   2020-12-15 [1] CRAN (R 3.6.3)
-#  pkgload         1.1.0   2020-05-29 [1] CRAN (R 3.6.3)
-#  prettyunits     1.1.1   2020-01-24 [1] CRAN (R 3.6.3)
-#  processx        3.4.5   2020-11-30 [1] CRAN (R 3.6.3)
-#  ps              1.5.0   2020-12-05 [1] CRAN (R 3.6.3)
-#  purrr           0.3.4   2020-04-17 [1] CRAN (R 3.6.3)
-#  R6              2.5.0   2020-10-28 [1] CRAN (R 3.6.3)
-#  remotes         2.2.0   2020-07-21 [1] CRAN (R 3.6.3)
-#  rlang           0.4.10  2020-12-30 [1] CRAN (R 3.6.3)
-#  rmarkdown       2.6     2020-12-14 [1] CRAN (R 3.6.3)
-#  rprojroot       2.0.2   2020-11-15 [1] CRAN (R 3.6.3)
-#  scales          1.1.1   2020-05-11 [1] CRAN (R 3.6.3)
-#  sessioninfo     1.1.1   2018-11-05 [1] CRAN (R 3.6.3)
-#  testthat        3.0.1   2020-12-17 [1] CRAN (R 3.6.3)
-#  usethis         2.0.1   2021-02-10 [1] CRAN (R 3.6.3)
-#  withr           2.4.1   2021-01-26 [1] CRAN (R 3.6.3)
-#  xfun            0.20    2021-01-06 [1] CRAN (R 3.6.3)
-#  yaml            2.2.1   2020-02-01 [1] CRAN (R 3.6.3)
+
  ```
 
 ```{r}
