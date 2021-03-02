@@ -319,7 +319,7 @@ margins <- list(
 )
 ```
 
-Why "protecting" single-sex spaces has no practical benefit for women {data-navmenu="Menu"}
+Bathroom bills have no practical benefit for women {data-navmenu="Menu"}
 =========================================
 
 <b>Why "protecting" single-sex spaces has no practical benefit for women</b>
@@ -598,7 +598,7 @@ The relative prevalence of specific gender identities is somewhat uncertain. The
 
 It may be surprising to the reader that women who are not trans will be incorrectly identified as trans many more times than trans women are correctly identified --- even if the probabilities to identify someone as trans or not trans, given that they are indeed trans or not trans respectively, are very high. Intuitively we might expect that if out of 100 trans women we were able to recognise 99 of them as trans, there ought to be a high probability that a person we perceived to be trans in the general population is indeed trans. But this is not the case! In fact, this probability is very small. Conversely, the probability that they are actually not trans is very high. Therefore the ratio between the latter and the former is large. This is because both of these probabilities are strongly dependent on the trans prevalence, which is *tiny*.<a href="#top1">↩</a>
 
-When someone is perceived to be trans, what is the probability that they are actually trans? {data-navmenu="Menu" data-orientation=rows}
+You can't always tell if someone is trans {data-navmenu="Menu" data-orientation=rows}
 =====================================
 
 <b>When someone is perceived to be trans, what is the probability that they are actually trans?</b>
@@ -877,7 +877,7 @@ $$
 $$
 Now let's consider *all possible scenarios* for any specified trans prevalence by assuming a continuum of values for $P(+|\mathrm{trans})$ and $P(-|\mathrm{cis})$. Each pair of values defines the accuracy with which people who are trans, and those who are not, can be identified. We can plot these values as points in a graph, $P(+|\mathrm{trans})$ on the horizontal axis and $P(-|\mathrm{cis})$ on the  vertical axis, and colour them by how many more times people who are not trans are misidentified than trans women are identified. We can also plot contour lines that can be annotated to show this information more clearly. This is how we obtained the plot on the first page.
 
-When a trans person uses a public toilet, who is at risk? {data-navmenu="Menu"}
+Who is at risk? {data-navmenu="Menu"}
 =========================================
 
 <b>When a trans person uses a public toilet, who is at risk?</b>
@@ -952,7 +952,7 @@ embed_youtube("vo42M8MdznY")
 
 ```{r mobile_video}
 # Smaller version for mobile:
-embed_youtube("vo42M8MdznY", width = 310)
+embed_youtube("vo42M8MdznY", width = 320)
 ```
 > YouTube video posted 12 April 2016 by Media Matters for America, shortly after North Carolina passed the Public Facilities Privacy & Security Act (HB2), which was partially repealed on 30 March 2017.
 
