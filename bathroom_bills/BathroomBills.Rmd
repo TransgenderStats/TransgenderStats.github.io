@@ -1,5 +1,5 @@
 ---
-title: "Why bathroom bills are bad for all women"
+title: "Why bathroom bills are bad"
 output: 
   flexdashboard::flex_dashboard:
     social: menu
@@ -338,8 +338,8 @@ out1 <- create(
     "\t • Trans, given that they are trans: %{x}<br>",
     "\t • Not trans, given that they are not trans: %{y}<br>",
     "How many more times people who are not trans\n",
-    "are misidentified as trans than trans people\n",
-    "are correctly identified: %{z:.1f}×",
+    "are misidentified as trans than trans people are\n",
+    "correctly identified: %{z:.1f}×",
     "<extra>%{fullData.name}</extra>"
   ), 
   plot_title = paste0(
@@ -408,6 +408,7 @@ fig1 %>%
 ```{r show_fig1, preview=TRUE}
 fig1
 ```
+
 > Move your mouse pointer over the plot to see the ratio of mistaken identifications to correct identifications. Higher numbers on labelled contours and lighter colours represent worsening performance.
 
 ### (Mis)identification probabilities {.no-mobile}
@@ -420,15 +421,15 @@ out2a <- create(
     "Probability to correctly identify a person as:\n",
     "\t • Trans, given that they are trans: %{x}<br>",
     "\t • Not trans, given that they are not trans: %{y}<br>",
-    "Probability that a person identified<br>",
-    "as trans is actually not trans: %{z:.2%}",
+    "Probability that a person perceived to be trans<br>",
+    "is actually not trans: %{z:.2%}",
     "<extra>%{fullData.name}</extra>"
   ), 
   plot_title = "", 
   cbar_title = paste0(
     "Probability that a\n",
-    "person identified\n",
-    "as trans is actually\n",
+    "person perceived to\n",
+    "be trans is actually\n",
     "not trans <i>(mistaken\n",
     "identification)</i>"
   ),
@@ -452,8 +453,8 @@ out2b <- create(
     "Probability to correctly identify a person as:\n",
     "\t • Trans, given that they are trans: %{x}<br>",
     "\t • Not trans, given that they are not trans: %{y}<br>",
-    "Probability that a person identified<br>",
-    "as trans is actually trans: %{z:.2%}",
+    "Probability that a person perceived to be trans<br>",
+    "is actually trans: %{z:.2%}",
     "<extra>%{fullData.name}</extra>"
   ), 
   plot_title = paste0(
@@ -462,8 +463,8 @@ out2b <- create(
   ), 
   cbar_title = paste0(
     "Probability that a\n",
-    "person identified\n",
-    "as trans is actually\n",
+    "person perceived to\n",
+    "be trans is actually\n",
     "trans <i>(correct\n",
     "identification)</i>"
   ),
@@ -595,12 +596,12 @@ The relative prevalence of specific gender identities is somewhat uncertain. The
 
 <a name="probabilities"></a><b>Identification probabilities</b>
 
-It may be surprising to the reader that women who are not trans will be incorrectly identified as trans many more times than trans women are identified --- even if the probabilities to identify someone as trans or not trans, given that they are indeed trans or not trans respectively, are very high. Intuitively we might expect that if out of 100 trans women we were able to recognise 99 of them as trans, there ought to be a high probability that a person we identify as trans in the general population is indeed trans. But this is not the case! In fact, this probability is very small. Conversely, the probability that they are actually not trans is very high. Therefore the ratio between the latter and the former is large. This is because both of these probabilities are strongly dependent on the trans prevalence, which is *tiny*.<a href="#top1">↩</a>
+It may be surprising to the reader that women who are not trans will be incorrectly identified as trans many more times than trans women are correctly identified --- even if the probabilities to identify someone as trans or not trans, given that they are indeed trans or not trans respectively, are very high. Intuitively we might expect that if out of 100 trans women we were able to recognise 99 of them as trans, there ought to be a high probability that a person we perceived to be trans in the general population is indeed trans. But this is not the case! In fact, this probability is very small. Conversely, the probability that they are actually not trans is very high. Therefore the ratio between the latter and the former is large. This is because both of these probabilities are strongly dependent on the trans prevalence, which is *tiny*.<a href="#top1">↩</a>
 
-When someone is recognised as trans, what is the probability that they are actually trans? {data-navmenu="Menu" data-orientation=rows}
+When someone is perceived to be trans, what is the probability that they are actually trans? {data-navmenu="Menu" data-orientation=rows}
 =====================================
 
-<b>When someone is recognised as trans, what is the probability that they are actually trans?</b>
+<b>When someone is perceived to be trans, what is the probability that they are actually trans?</b>
 
 Row
 -----------------------------------------
@@ -623,10 +624,10 @@ tree <- data.frame(
     "Population", 
     "Not trans", 
     "Trans", 
-    "Identified as not trans", 
-    "Identified as trans", 
-    "Identified as trans", 
-    "Identified as not trans"
+    "Perceived as not trans", 
+    "Perceived as trans", 
+    "Perceived as trans", 
+    "Perceived as not trans"
   ),
   # Probabilities:
   percentage = c(
@@ -643,10 +644,10 @@ tree <- data.frame(
     "#FFFFBF", # General population
     "#FC8D59", # Not trans
     "#99D594", # Trans
-    "#FEE08B", # Identified as not trans
-    "#D53E4F", # Identified as trans
-    "#3288BD", # Identified as trans
-    "#E6F598"  # Identified as not trans
+    "#FEE08B", # Perceived as not trans
+    "#D53E4F", # Perceived as trans
+    "#3288BD", # Perceived as trans
+    "#E6F598"  # Perceived as not trans
   ),
   # Text with parenthetical remarks:
   remarks = c(
@@ -714,13 +715,13 @@ Row
 
 ### How to use and interpret
 
-If a person is recognised as trans, this does not necessarily mean that the person is actually trans. Here we demonstrate, with a simple example, how to calculate the probability that a person recognised as trans is actually trans. This will help the reader to understand why bathroom bills do not benefit women. Although the mathematics is not complicated, we provide an interactive diagram to help the reader more easily understand the calculation.
+If a person is perceived to be trans, this does not necessarily mean that the person is actually trans. Here we demonstrate, with a simple example, how to calculate the probability that a person perceived to be trans is actually trans. This will help the reader to understand why bathroom bills do not benefit women. Although the mathematics is not complicated, we provide an interactive diagram to help the reader more easily understand the calculation.
 
 **The reader does not need to understand algebra to understand the calculation; we will walk through the calculation step-by-step using the probability tree diagram that will make the calculation exceptionally simple: the mathematics required to understand this calculation (percentages and basic concepts of probability) is typically taught to children in the [US](http://www.corestandards.org/assets/CCSSI_Math%20Standards.pdf)$^{11}$ and [UK](https://www.gov.uk/government/publications/national-curriculum-in-england-mathematics-programmes-of-study/national-curriculum-in-england-mathematics-programmes-of-study)$^{12}$ by age 14.**
 
-The probability tree diagram shows all the possible events. The size of the nodes provides an indication of the probability of the event that it corresponds to: large nodes indicate large probability, small nodes indicate small probability. A person from the general population may be either trans or not trans. If the person is trans, they may be identified as trans (positive identification), or they may be identified as not trans (negative identification), and similarly if the person is not trans. This results in four possible outcomes, each with different probabilities, which we calculate by multiplying the probabilities along each branch of the probability tree. The probabilities for all the outcomes sum to 100%, as they must, because all possible outcomes are exhausted. The ends of the branches represent what can be observed and known with certainty. Whether a person is trans or not is not directly observable and can only be inferred with some uncertainty.
+The probability tree diagram shows all the possible events. The size of the nodes provides an indication of the probability of the event that it corresponds to: large nodes indicate large probability, small nodes indicate small probability. A person from the general population may be either trans or not trans. If the person is trans, they may be perceived to be trans ("positive identification"), or they may be perceived to be not trans ("negative identification"), and similarly if the person is not trans. This results in four possible outcomes, each with different probabilities, which we calculate by multiplying the probabilities along each branch of the probability tree. The probabilities for all the outcomes sum to 100%, as they must, because all possible outcomes are exhausted. The ends of the branches represent what can be observed and known with certainty. Whether a person is trans or not is not directly observable and can only be inferred with some uncertainty.
 
-To calculate the probability that a person is trans (or not), given that they were identified as trans (or not), divide the probability of the outcome of interest by the sum of the probabilities for the two possible outcomes corresponding to how the person was identified (*identified as trans* or *identified as not trans*). See the discussion for more details. 
+To calculate the probability that a person is trans (or not), given that they were perceived to be trans (or not), divide the probability of the outcome of interest by the sum of the probabilities for the two possible outcomes corresponding to how the person was perceived (*perceived as trans* or *perceived as not trans*). See the discussion for more details. 
 
 ### Details
 
@@ -744,7 +745,7 @@ The most realistic scenario is that single-sex spaces will be self-policed by th
 
 In this example, let's be charitable to those who advocate for bathroom bills and assume that is is possible to identify trans people with *very high* accuracy --- far greater accuracy than is actually plausible under realistic circumstances. Let's say that trans people can be identified with 99% accuracy.
 
-Moreover, when someone is identified as trans, we'll say that this is a *positive identification*: this is evidence that supports the hypothesis that the person is trans. Conversely, when someone is identified as not trans, we'll say that this is a *negative identification*: this is evidence that opposes the hypothesis that the person is trans. We say that the probability that a trans person is identified as trans (positive identification) is 99%, while probability of getting the wrong result (negative identification) is 1%. In mathematical notation we write this as:
+Moreover, when someone is perceived to be trans, we'll say that this is a *positive identification*: this is evidence that supports the hypothesis that the person is trans. Conversely, when someone is perceived to be not trans, we'll say that this is a *negative identification*: this is evidence that opposes the hypothesis that the person is trans. We say that the probability that a trans person is identified as trans (positive identification) is 99%, while probability of getting the wrong result (negative identification) is 1%. In mathematical notation we write this as:
 
 \begin{align}
 P(+|\mathrm{trans}) &= 0.99,\\
@@ -771,59 +772,59 @@ P(\mathrm{cis}) &= 0.9942
 
 This information is all we need, and is summarised on the probability tree diagram. Moving the mouse pointer over a node will trigger a pop-up display of the probability of the event represented by that node. Here are the probabilities for the four possible outcomes:
 
- * Not trans and identified as not trans ($-$): 
+ * Not trans and perceived to be not trans: 
  
 \begin{align}
-&= P(-|\textrm{cis})P(\textrm{cis})\\ &= 97\% \times 99.42\%\\ &= 96.44\%
+P(-|\textrm{cis})P(\textrm{cis}) &= 97\% \times 99.42\%\\ &= 96.44\%
 \end{align}
 
- * Not trans and identified as trans ($+$): 
+ * Not trans and perceived to be trans: 
  
 \begin{align}
-&= P(+|\textrm{cis})P(\textrm{cis})\\ &= 3\% \times 99.42\%\\ &= 2.98\%
+P(+|\textrm{cis})P(\textrm{cis}) &= 3\% \times 99.42\%\\ &= 2.98\%
 \end{align}
 
- * Trans and identified as trans ($+$): 
+ * Trans and perceived to be trans: 
  
 \begin{align}
-&= P(+|\textrm{trans})P(\textrm{trans})\\ &= 99\% \times 0.58\%\\ &= 0.57\%
+P(+|\textrm{trans})P(\textrm{trans}) &= 99\% \times 0.58\%\\ &= 0.57\%
 \end{align}
 
- * Trans and identified as not trans ($-$): 
+ * Trans and perceived to be not trans: 
  
 \begin{align}
-&= P(-|\textrm{trans})P(\textrm{trans})\\ &= 1\% \times 0.58\%\\ &= 0.01\%
+P(-|\textrm{trans})P(\textrm{trans}) &= 1\% \times 0.58\%\\ &= 0.01\%
 \end{align}
 
-The probability $P(+|\mathrm{trans}) = 99\%$ tells us how accurately trans people can be identified. It tells us the performance of the means to identify trans people. *It's a property of the identification method, and not of the person being identified.* What we actually want to know is something different: we want to know what is the probability that someone who is identified as trans is in fact trans. That is, what is the probability that a person is indeed trans, given that they were positively identified? We write this as: $P(\mathrm{trans}|+)$. This is not the same as $P(+|\mathrm{trans})$. This can be proved mathematically, but can be understood intuitively as follows: $P(\textrm{rain}|\textrm{umbrella})$, the probability that it is raining, given that you are carrying an open umbrella, is not the same as $P(\textrm{umbrella}|\textrm{rain})$, the probability that you are carrying an open umbrella, given that it is raining. The most likely reason for carrying an open umbrella is that it is raining, so if you are carrying an open umbrella then it is probably raining. However, if it is raining, this does not necessarily mean that then you are carrying an open umbrella! When we write $P(B|A)$, this is the *conditional probability* that an event $B$ will occur given the knowledge that an event $A$ has already occurred: *the order of events is important*. 
+The probability $P(+|\mathrm{trans}) = 99\%$ tells us how accurately trans people can be identified. It tells us the performance of the means to identify trans people. *It's a property of the identification method, and not of the person being identified.* What we actually want to know is something different: we want to know what is the probability that someone who is perceived to be trans is in fact trans. That is, what is the probability that a person is indeed trans, given that they were positively identified? We write this as: $P(\mathrm{trans}|+)$. This is not the same as $P(+|\mathrm{trans})$. This can be proved mathematically, but can be understood intuitively as follows: $P(\textrm{rain}|\textrm{umbrella})$, the probability that it is raining, given that you are carrying an open umbrella, is not the same as $P(\textrm{umbrella}|\textrm{rain})$, the probability that you are carrying an open umbrella, given that it is raining. The most likely reason for carrying an open umbrella is that it is raining, so if you are carrying an open umbrella then it is probably raining. However, if it is raining, this does not necessarily mean that then you are carrying an open umbrella! When we write $P(B|A)$, this is the *conditional probability* that an event $B$ will occur given the knowledge that an event $A$ has already occurred: *the order of events is important*. 
 
-For the conditional probability $P(+|\mathrm{trans})$, we know that a trans person was observed, but we don't know with certainty if there will be a positive identification: it is possible that the person will be negatively identified (identified as not trans).
+For the conditional probability $P(+|\mathrm{trans})$, we know that a trans person was observed, but we don't know with certainty if there will be a positive identification: it is possible that the person will be negatively identified (perceived to be not trans).
 
 For the conditional probability $P(\mathrm{trans}|+)$, we know there was a positive identification, but we don't know with certainty if a trans person was observed.
 
-Let's say that someone enters a public toilet or single-sex facility and they are judged to be trans by other users of the facility. What is the probability that they are actually trans? We can imagine repeating this experiment many times and measuring what happens. Calculating $P(\mathrm{trans}|+)$ is equivalent to calculating the percentage of people who were identified as trans who are actually trans. The two outcomes that result in a positive identification are:
+Let's say that someone enters a public toilet or single-sex facility and they are judged to be trans by other users of the facility. What is the probability that they are actually trans? We can imagine repeating this experiment many times and measuring what happens. Calculating $P(\mathrm{trans}|+)$ is equivalent to calculating the percentage of people who were perceived to be trans who are actually trans. The two outcomes that result in a positive identification are:
 
- * Trans and identified as trans ($+$):
+ * Trans and perceived to be trans:
  
 \begin{align}
-&= P(+|\textrm{trans})P(\textrm{trans})\\ &= 99\% \times 0.58\%\\ &= 0.57\%
+P(+|\textrm{trans})P(\textrm{trans}) &= 99\% \times 0.58\%\\ &= 0.57\%
 \end{align}
 
- * Not trans and identified as trans ($+$):
+ * Not trans and perceived to be trans:
  
 \begin{align}
-&= P(+|\textrm{cis})P(\textrm{cis})\\ &= 3\% \times 99.42\%\\ &= 2.98\%
+P(+|\textrm{cis})P(\textrm{cis}) &= 3\% \times 99.42\%\\ &= 2.98\%
 \end{align}
 
 The probability that either of these events occur is the sum of their individual probabilities:
 $$
 P(+|\textrm{trans})P(\textrm{trans}) + P(+|\textrm{cis})P(\textrm{cis})
 $$
-We're interested in the outcome in which a trans person is observed and they are identified as trans, which occurs with probability:
+We're interested in the outcome in which a trans person is observed and they are perceived to be trans, which occurs with probability:
 $$
 P(+|\textrm{trans})P(\textrm{trans})
 $$
-Therefore, the fraction (or percentage) of those identified as trans who are actually trans, $P(\mathrm{trans}|+)$, is:
+Therefore, the fraction (or percentage) of those perceived to be trans who are actually trans, $P(\mathrm{trans}|+)$, is:
 $$
 \frac{P(+|\textrm{trans})P(\textrm{trans})}{P(+|\textrm{trans})P(\textrm{trans}) + P(+|\textrm{cis})P(\textrm{cis})}
 $$
@@ -839,7 +840,7 @@ For our specific example, we can substitute the probabilities we obtained earlie
 &= \frac{P(+|\mathrm{trans})P(\mathrm{trans})}{P(+|\mathrm{trans})P(\mathrm{trans})+P(+|\mathrm{cis})P(\mathrm{cis})}\\ &\\ &= \frac{0.99\times0.0058}{0.99\times0.0058 + 0.03\times0.9942}\\ &\\ &= 0.161
 \end{align}
 
-So the probability that a person is trans, given that they were recognised as trans, is only 16.1%. This may seem surprising, given the 99% accuracy to identify trans people. The result is small because the prevalence of trans people in the population is so tiny.
+So the probability that a person is trans, given that they were perceived to be trans, is only 16.1%. This may seem surprising, given the 99% accuracy to identify trans people. The result is small because the prevalence of trans people in the population is so tiny.
 
 Similarly, the probability that a person is not trans, given they were positively identified, $P(\mathrm{cis}|+)$, is:
 
@@ -951,7 +952,7 @@ embed_youtube("vo42M8MdznY")
 
 ```{r mobile_video}
 # Smaller version for mobile:
-embed_youtube("vo42M8MdznY", width = 300)
+embed_youtube("vo42M8MdznY", width = 310)
 ```
 > YouTube video posted 12 April 2016 by Media Matters for America, shortly after North Carolina passed the Public Facilities Privacy & Security Act (HB2), which was partially repealed on 30 March 2017.
 
@@ -1026,10 +1027,106 @@ State Standards Initiative. Archived from [the original](http://www.corestandard
 
 
 ```{r reproducibility}
+# - Session info ---------------------------------------------------------------
+#  setting  value                       
+#  version  R version 3.6.1 (2019-07-05)
+#  os       Windows 10 x64              
+#  system   x86_64, mingw32             
+#  ui       RStudio                     
+#  language (EN)                        
+#  collate  English_United Kingdom.1252 
+#  ctype    English_United Kingdom.1252 
+#  tz       Europe/Prague               
+#  date     2021-03-02                  
+# 
+# - Packages -------------------------------------------------------------------
+#  package         * version date       lib source        
+#  assertthat        0.2.1   2019-03-21 [1] CRAN (R 3.6.3)
+#  backports         1.2.1   2020-12-09 [1] CRAN (R 3.6.3)
+#  broom             0.7.4   2021-01-29 [1] CRAN (R 3.6.3)
+#  cachem            1.0.3   2021-02-04 [1] CRAN (R 3.6.3)
+#  callr             3.5.1   2020-10-13 [1] CRAN (R 3.6.3)
+#  cellranger        1.1.0   2016-07-27 [1] CRAN (R 3.6.3)
+#  cli               2.3.0   2021-01-31 [1] CRAN (R 3.6.3)
+#  collapsibleTree * 0.1.7   2018-08-22 [1] CRAN (R 3.6.3)
+#  colorspace        2.0-0   2020-11-11 [1] CRAN (R 3.6.3)
+#  crayon            1.4.1   2021-02-08 [1] CRAN (R 3.6.3)
+#  data.table        1.13.6  2020-12-30 [1] CRAN (R 3.6.3)
+#  data.tree         1.0.0   2020-08-03 [1] CRAN (R 3.6.3)
+#  DBI               1.1.1   2021-01-15 [1] CRAN (R 3.6.3)
+#  dbplyr            2.1.0   2021-02-03 [1] CRAN (R 3.6.3)
+#  desc              1.2.0   2018-05-01 [1] CRAN (R 3.6.3)
+#  devtools          2.3.2   2020-09-18 [1] CRAN (R 3.6.3)
+#  digest            0.6.27  2020-10-24 [1] CRAN (R 3.6.3)
+#  dplyr           * 1.0.4   2021-02-02 [1] CRAN (R 3.6.3)
+#  ellipsis          0.3.1   2020-05-15 [1] CRAN (R 3.6.3)
+#  evaluate          0.14    2019-05-28 [1] CRAN (R 3.6.3)
+#  fastmap           1.1.0   2021-01-25 [1] CRAN (R 3.6.3)
+#  flexdashboard     0.5.2   2020-06-24 [1] CRAN (R 3.6.3)
+#  forcats         * 0.5.1   2021-01-27 [1] CRAN (R 3.6.3)
+#  formattable     * 0.2.1   2021-01-07 [1] CRAN (R 3.6.3)
+#  fs                1.5.0   2020-07-31 [1] CRAN (R 3.6.3)
+#  generics          0.1.0   2020-10-31 [1] CRAN (R 3.6.3)
+#  ggplot2         * 3.3.3   2020-12-30 [1] CRAN (R 3.6.3)
+#  glue              1.4.2   2020-08-27 [1] CRAN (R 3.6.3)
+#  gridExtra         2.3     2017-09-09 [1] CRAN (R 3.6.3)
+#  gtable            0.3.0   2019-03-25 [1] CRAN (R 3.6.3)
+#  haven             2.3.1   2020-06-01 [1] CRAN (R 3.6.3)
+#  hms               1.0.0   2021-01-13 [1] CRAN (R 3.6.3)
+#  htmltools         0.5.1.1 2021-01-22 [1] CRAN (R 3.6.3)
+#  htmlwidgets       1.5.3   2020-12-10 [1] CRAN (R 3.6.3)
+#  httr              1.4.2   2020-07-20 [1] CRAN (R 3.6.3)
+#  jsonlite          1.7.2   2020-12-09 [1] CRAN (R 3.6.3)
+#  knitr             1.31    2021-01-27 [1] CRAN (R 3.6.3)
+#  lazyeval          0.2.2   2019-03-15 [1] CRAN (R 3.6.3)
+#  lifecycle         0.2.0   2020-03-06 [1] CRAN (R 3.6.3)
+#  lubridate         1.7.9.2 2020-11-13 [1] CRAN (R 3.6.3)
+#  magrittr          2.0.1   2020-11-17 [1] CRAN (R 3.6.3)
+#  memoise           2.0.0   2021-01-26 [1] CRAN (R 3.6.3)
+#  modelr            0.1.8   2020-05-19 [1] CRAN (R 3.6.3)
+#  munsell           0.5.0   2018-06-12 [1] CRAN (R 3.6.3)
+#  pillar            1.4.7   2020-11-20 [1] CRAN (R 3.6.3)
+#  pkgbuild          1.2.0   2020-12-15 [1] CRAN (R 3.6.3)
+#  pkgconfig         2.0.3   2019-09-22 [1] CRAN (R 3.6.3)
+#  pkgload           1.1.0   2020-05-29 [1] CRAN (R 3.6.3)
+#  plotly          * 4.9.3   2021-01-10 [1] CRAN (R 3.6.3)
+#  prettyunits       1.1.1   2020-01-24 [1] CRAN (R 3.6.3)
+#  processx          3.4.5   2020-11-30 [1] CRAN (R 3.6.3)
+#  ps                1.5.0   2020-12-05 [1] CRAN (R 3.6.3)
+#  purrr           * 0.3.4   2020-04-17 [1] CRAN (R 3.6.3)
+#  R6                2.5.0   2020-10-28 [1] CRAN (R 3.6.3)
+#  Rcpp              1.0.6   2021-01-15 [1] CRAN (R 3.6.3)
+#  readr           * 1.4.0   2020-10-05 [1] CRAN (R 3.6.3)
+#  readxl            1.3.1   2019-03-13 [1] CRAN (R 3.6.3)
+#  remotes           2.2.0   2020-07-21 [1] CRAN (R 3.6.3)
+#  reprex            1.0.0   2021-01-27 [1] CRAN (R 3.6.3)
+#  rlang             0.4.10  2020-12-30 [1] CRAN (R 3.6.3)
+#  rmarkdown         2.6     2020-12-14 [1] CRAN (R 3.6.3)
+#  rprojroot         2.0.2   2020-11-15 [1] CRAN (R 3.6.3)
+#  rsconnect         0.8.16  2019-12-13 [1] CRAN (R 3.6.3)
+#  rstudioapi        0.13    2020-11-12 [1] CRAN (R 3.6.3)
+#  rvest             0.3.6   2020-07-25 [1] CRAN (R 3.6.3)
+#  scales            1.1.1   2020-05-11 [1] CRAN (R 3.6.3)
+#  sessioninfo       1.1.1   2018-11-05 [1] CRAN (R 3.6.3)
+#  stringi           1.5.3   2020-09-09 [1] CRAN (R 3.6.3)
+#  stringr         * 1.4.0   2019-02-10 [1] CRAN (R 3.6.3)
+#  testthat          3.0.1   2020-12-17 [1] CRAN (R 3.6.3)
+#  tibble          * 3.0.6   2021-01-29 [1] CRAN (R 3.6.3)
+#  tidyr           * 1.1.2   2020-08-27 [1] CRAN (R 3.6.3)
+#  tidyselect        1.1.0   2020-05-11 [1] CRAN (R 3.6.3)
+#  tidyverse       * 1.3.0   2019-11-21 [1] CRAN (R 3.6.3)
+#  usethis           2.0.1   2021-02-10 [1] CRAN (R 3.6.3)
+#  vctrs             0.3.6   2020-12-17 [1] CRAN (R 3.6.3)
+#  vembedr         * 0.1.4   2020-10-10 [1] CRAN (R 3.6.3)
+#  viridis         * 0.5.1   2018-03-29 [1] CRAN (R 3.6.3)
+#  viridisLite     * 0.3.0   2018-02-01 [1] CRAN (R 3.6.3)
+#  withr             2.4.1   2021-01-26 [1] CRAN (R 3.6.3)
+#  xfun              0.20    2021-01-06 [1] CRAN (R 3.6.3)
+#  xml2              1.3.2   2020-04-23 [1] CRAN (R 3.6.3)
+#  yaml              2.2.1   2020-02-01 [1] CRAN (R 3.6.3)
+```
 
- ```
-
-```{r}
+```{r pfp}
 # %%%###(((#(%@@@@@@@%#((//((/#(((((((#%%&%%&%%%%####(%#((#######(##((##(###%%%#%#
 # %%%%%####/(&@@@@@@@@(((#(((((((/((%&&&%%%%%%%%#%%#%#&#%####((###(((#(#(#((((#(##
 # %%###(((((#%@@@@@@@@#(##((@@@@@@&@@@@@@@@@@&&&&%%%&%&%&#%###(###########((((#(((
