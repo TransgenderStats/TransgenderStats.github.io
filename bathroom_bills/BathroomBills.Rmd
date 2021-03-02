@@ -110,17 +110,9 @@ for(step in 1:length(`prevalence values`)) {
       scales::percent(prevalence, accuracy = 0.01),
       if_else(
         prevalence < 0.36/100 | prevalence > 0.95/100,
-        if_else(
-          prevalence > 1.4/100,
-          paste0(
-            "<br><i>Well outside Williams<br>Institute's range",
-            "<br>of plausible values</i>",
-            "<br><b>Probability that this<br>value is true is tiny</b>"
-          ),
-          paste0(
-            "<br><i>Outside Williams<br>Institute's range<br>of plausible values</i>",
-            "<br><b>Probability that this<br>value is true is < 5%</b>"
-          )
+        paste0(
+          "<br><i>Outside Williams<br>Institute's range<br>of plausible values</i>",
+          "<br><b>Probability that this<br>value is true is < 5%</b>"
         ),
         ifelse(
           round(prevalence, 3) == 0.6/100,
@@ -306,15 +298,24 @@ Column {.tabset .tabset-fade}
 # Create the base figure and steps for the first plot:
 out1 <- create(
   z_var = "rate", 
+  # hovertemplate = paste0(
+  #   "Probability to correctly identify a person as:\n",
+  #   "\t • Trans, given that they are trans: %{x}<br>",
+  #   "\t • Not trans, given that they are not trans: %{y}<br>",
+  #   "How many more times people who are not trans\n",
+  #   "are misidentified as trans than trans people are\n",
+  #   "correctly identified: %{z:.1f}×",
+  #   "<extra>%{fullData.name}</extra>"
+  # ), 
   hovertemplate = paste0(
-    "Probability to correctly identify a person as:\n",
-    "\t • Trans, given that they are trans: %{x}<br>",
-    "\t • Not trans, given that they are not trans: %{y}<br>",
-    "How many more times people who are not trans\n",
-    "are misidentified as trans than trans people are\n",
-    "correctly identified: %{z:.1f}×",
+    "Accuracy for identifying a person who is:\n",
+    "\t • Trans: %{x}<br>",
+    "\t • Not trans: %{y}<br>",
+    "How many more times people who\n",
+    "are not trans are mistaken to be trans\n",
+    "than trans people are identified: %{z:.1f}×",
     "<extra>%{fullData.name}</extra>"
-  ), 
+  ),
   plot_title = paste0(
     "Ratio of number of people misidentified as trans\n",
     "to number of people correctly identified as trans\n&nbsp;"
@@ -351,7 +352,7 @@ out1$fig %>%
           suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
         ),
         steps = out1$steps,
-        pad = list(t = 100, r = 0, b = 0, l = 0),
+        pad = list(t = 100, r = -50, b = 0, l = -50),
         scene = list(x = 1, y = 1, z = 1)
       )
     )
@@ -376,86 +377,10 @@ fig1 %>%
   {.} -> fig1 # Done
 ```
 
-```{r mobile_out1}
-# Create the base figure and steps for the first plot:
-m_out1 <- create(
-  z_var = "rate", 
-  hovertemplate = paste0(
-    "%{z:.1f}×",
-    "<extra></extra>"
-  ), 
-  plot_title = paste0(
-    "Ratio of number of people misidentified as trans\n",
-    "to number of people correctly identified as trans\n&nbsp;"
-  ),
-  cbar_title = paste0(
-    "How many more\n",
-    "times people who\n",
-    "are not trans are\n",
-    "mistaken to be\n",
-    "trans than trans\n",
-    "people are ID'd"
-  ), 
-  tickprefix = NULL,
-  ticksuffix = "×",
-  cbar_pal = "C", 
-  cbar_tickformat = "",
-  minZ = NULL, 
-  maxZ = NULL,
-  cbar_x = 1, 
-  cbar_y = 1, 
-  cbar_len = 1
-)
-```
-
-```{r mobile_slider1}
-# Add slider control to plot:
-m_out1$fig %>%
-  layout(
-    sliders = list(
-      list(
-        active = p - 1, # Subtract one for the blank plot at the start
-        currentvalue = list(
-          prefix = "Trans prevalence: ",
-          suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
-        ),
-        steps = out1$steps,
-        pad = list(t = 100, r = -70, b = 0, l = -70),
-        scene = list(x = 1, y = 1, z = 1)
-      )
-    )
-  ) %>% 
-  {.} -> m_fig1
-```
-
-```{r mobile_plot1}
-m_fig1 %>% 
-  config(
-    # Control which modebar buttons we want to show the user:
-    modeBarButtons = list(
-      list(
-        "toImage",
-        "toggleSpikelines")
-    ), 
-    displaylogo = FALSE, # Turn off the plotly logo
-    toImageButtonOptions = list(filename = "plotOutput1")
-  ) %>% 
-  # Set the margins and allow the plot to autosize to the user's display:
-  layout(margin = margins, autosize = TRUE) %>% 
-  {.} -> m_fig1 # Done
-```
-
-### Ratio of incorrect to correct identifications {.no-mobile}
+### Ratio of incorrect to correct identifications
 
 ```{r show_fig1}
 fig1
-```
-> Move your mouse pointer over the plot to see the ratio of mistaken identifications to correct identifications. Higher numbers on labelled contours and lighter colours represent worsening performance.
-
-### Ratio of incorrect to correct identifıcations {.mobile}
-
-```{r mobile_show_fig1}
-m_fig1
 ```
 > Move your mouse pointer over the plot to see the ratio of mistaken identifications to correct identifications. Higher numbers on labelled contours and lighter colours represent worsening performance.
 
@@ -466,11 +391,11 @@ m_fig1
 out2a <- create(
   z_var = "P(cis|+)", 
   hovertemplate = paste0(
-    "Probability to correctly identify a person as:\n",
-    "\t • Trans, given that they are trans: %{x}<br>",
-    "\t • Not trans, given that they are not trans: %{y}<br>",
-    "Probability that a person perceived to be trans<br>",
-    "is actually not trans: %{z:.2%}",
+    "Accuracy for identifying a person who is:\n",
+    "\t • Trans: %{x}<br>",
+    "\t • Not trans: %{y}<br>",
+    "Probability that a person perceived to be<br>",
+    "trans is actually not trans: %{z:.2%}",
     "<extra>%{fullData.name}</extra>"
   ), 
   plot_title = "", 
@@ -498,11 +423,11 @@ out2a <- create(
 out2b <- create(
   z_var = "P(trans|+)", 
   hovertemplate = paste0(
-    "Probability to correctly identify a person as:\n",
-    "\t • Trans, given that they are trans: %{x}<br>",
-    "\t • Not trans, given that they are not trans: %{y}<br>",
-    "Probability that a person perceived to be trans<br>",
-    "is actually trans: %{z:.2%}",
+    "Accuracy for identifying a person who is:\n",
+    "\t • Trans: %{x}<br>",
+    "\t • Not trans: %{y}<br>",
+    "Probability that a person perceived to be<br>",
+    "trans is actually trans: %{z:.2%}",
     "<extra>%{fullData.name}</extra>"
   ), 
   plot_title = paste0(
@@ -557,7 +482,7 @@ fig2 %>%
           suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
         ),
         steps = out2a$steps,
-        pad = list(t = 100, r = 0, b = 0, l = 0),
+        pad = list(t = 100, r = -50, b = 0, l = -50),
         scene = list(x = 1, y = 1, z = 1)
       )
     )
