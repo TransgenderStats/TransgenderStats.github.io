@@ -4,19 +4,9 @@ output:
   flexdashboard::flex_dashboard:
     social: menu
     source_code: embed
-    includes:
-      in_header: header.html
 header-includes:
   - \usepackage{amsmath,mathpazo}
 ---
-
-<!--
-base_url: https://rpubs.com/transgenderstats/bathroom_bills
-  player: https://alex.miller.im/projects/KDE/plotly_interactive/index.html
-  base_url: https://transgenderstats.shinyapps.io/bathroom_bills
-preview: https://rstudio.github.io/distill/images/javascript-d3-preview.png
-
--->
 
 ```{r licence}
 # MIT License
@@ -56,21 +46,6 @@ require(viridis) # For colourblind friendly colour palettes
 require(collapsibleTree) # For plotting probability trees
 require(formattable) # For nicely formatted numbers
 require(vembedr) # For embedding videos
-```
-
-```{r header, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE )
-# Create header.html
-fileConn <- file("header.html")
-c('<meta name="twitter:card" content="summary_large_image"></meta>',
-  '<meta name="twitter:site" content="@TransgenderStat" />',
-  '<meta name="twitter:creator" content="@PropertyOfMyCat" />',
-  '<meta property="twitter:title" content="Why bathroom bills are a problem for all women" />',
-  '<meta property="twitter:description" content="Why protecting single-sex spaces has no practical benefit for women" />',
-  '<meta property="twitter:image" content="https://TransgenderStats.github.io/BathroomBills/preview.jpg" />'
-) %>% 
-  writeLines(fileConn)
-close(fileConn)
 ```
 
 ```{r bayes}
@@ -621,12 +596,12 @@ tree <- data.frame(
     "Trans"
   ),
   leaves = c(
-    "Population", 
-    "Not trans", 
-    "Trans", 
-    "Perceived as not trans", 
-    "Perceived as trans", 
-    "Perceived as trans", 
+    "Population",
+    "Not trans",
+    "Trans",
+    "Perceived as not trans",
+    "Perceived as trans",
+    "Perceived as trans",
     "Perceived as not trans"
   ),
   # Probabilities:
@@ -699,7 +674,7 @@ collapsibleTreeNetwork(
   collapsed = FALSE,
   attribute = "percentage", 
   nodeSize = "nodesize", 
-  fontSize = 14, 
+  fontSize = 13, 
   fill = "colour",
   tooltipHtml = "tooltip"
 ) -> probability_tree
