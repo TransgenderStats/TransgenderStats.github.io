@@ -1,5 +1,5 @@
 ---
-title: "Why bathroom bills are a problem for all women"
+title: "Why bathroom bills are bad for all women"
 output: 
   flexdashboard::flex_dashboard:
     social: menu
@@ -7,7 +7,7 @@ output:
     includes:
       in_header: header.html
 header-includes:
-  - \usepackage{amsmath}
+  - \usepackage{amsmath,mathpazo}
 ---
 
 <!--
@@ -266,7 +266,7 @@ create <- function(z_var, # What we want to plot on the z-axis
           xref = 'x', 
           yref = 'y', 
           x = 0.5, 
-          y = 0.98,
+          y = 0.9725,
           font = list(size = 15)
         ),
         xaxis = list(
@@ -612,15 +612,15 @@ Row
 tree <- data.frame(
   branches = c(
     NA, 
-    "General population", 
-    "General population", 
+    "Population", 
+    "Population", 
     "Not trans", 
     "Not trans", 
     "Trans", 
     "Trans"
   ),
   leaves = c(
-    "General population", 
+    "Population", 
     "Not trans", 
     "Trans", 
     "Identified as not trans", 
@@ -651,7 +651,7 @@ tree <- data.frame(
   # Text with parenthetical remarks:
   remarks = c(
     "", 
-    "", 
+    "<br>(cis)", 
     "",
     "<br>(True negative)", 
     "<br>(False positive)", 
@@ -661,10 +661,10 @@ tree <- data.frame(
   # Text explaining how the probabilities were calculated:
   maths = c(
     "", 
-    "P(not trans) = ", 
+    "P(cis) = ", 
     "P(trans) = ",
-    "P(−|not trans) × P(not trans)<br>= 97% × 99.42%<br>= ", 
-    "P(+|not trans) × P(not trans)<br>= 3% × 99.42%<br>= ", 
+    "P(−|cis) × P(cis)<br>= 97% × 99.42%<br>= ", 
+    "P(+|cis) × P(cis)<br>= 3% × 99.42%<br>= ", 
     "P(+|trans) × P(trans)<br>= 99% × 0.58%<br>= ",
     "P(−|trans) × P(trans)<br>= 1% × 0.58%<br>= "
   )
@@ -698,7 +698,7 @@ collapsibleTreeNetwork(
   collapsed = FALSE,
   attribute = "percentage", 
   nodeSize = "nodesize", 
-  fontSize = 15, 
+  fontSize = 14, 
   fill = "colour",
   tooltipHtml = "tooltip"
 ) -> probability_tree
@@ -746,33 +746,54 @@ In this example, let's be charitable to those who advocate for bathroom bills an
 
 Moreover, when someone is identified as trans, we'll say that this is a *positive identification*: this is evidence that supports the hypothesis that the person is trans. Conversely, when someone is identified as not trans, we'll say that this is a *negative identification*: this is evidence that opposes the hypothesis that the person is trans. We say that the probability that a trans person is identified as trans (positive identification) is 99%, while probability of getting the wrong result (negative identification) is 1%. In mathematical notation we write this as:
 
-$$
-P(+|\mathrm{trans}) = 0.99,~\\
-P(-|\mathrm{trans}) = 0.01
-$$
-$P$ denotes a probability, and the vertical bar "$|$" means "given", so we can read the above as: "the probability that someone is positively identified, given that they are trans, is 0.99 (99%), and the probability that someone is negatively identified, given that they are trans, is 0.01 (1%)". This is equivalent to the statement that 99 out of a hundred trans people can be correctly identified as trans, and that one person who is actually trans will be mistaken as not trans. We say that the *true positive rate* is 99% and the *false negative rate* is 1%. These are all equivalent statements.
+\begin{align}
+P(+|\mathrm{trans}) &= 0.99,\\
+P(-|\mathrm{trans}) &= 0.01
+\end{align}
+
+$P$ denotes a probability, and the vertical bar $|$ means "given", so we can read the above as: "the probability that someone is positively identified, given that they are trans, is 0.99 (99%), and the probability that someone is negatively identified, given that they are trans, is 0.01 (1%)". This is equivalent to the statement that 99 out of a hundred trans people can be correctly identified as trans, and that one person who is actually trans will be mistaken as not trans. We say that the *true positive rate* is 99% and the *false negative rate* is 1%. These are all equivalent statements.
 
 We're also interested in what the probability is that a person is negatively identified, given that the person is in fact not trans. This is not necessarily equal to the accuracy for identifying a trans person. We may hypothesise that it may be easier to identify one group of people than the other. For notational convenience we'll introduce some new terminology that will make our equations shorter and easier to read: we'll use the term "cis" to replace the more cumbersome "not trans". Cisgender is a term for people whose gender identity matches their sex assigned at birth. Cisgender has its origin in the Latin-derived prefix cis-, meaning "on this side of", which is the opposite of trans-, meaning "across from" or "on the other side of". Let's assume that the probability that a person is negatively identified, given that they are indeed not trans, is 97%; it then follows that the probability of getting the wrong result (positively identification) is 3%:
 
-$$
-P(-|\mathrm{cis}) = 0.97,~\\
-P(+|\mathrm{cis}) = 0.03
-$$
+\begin{align}
+P(-|\mathrm{cis}) &= 0.97,\\
+P(+|\mathrm{cis}) &= 0.03
+\end{align}
+
 This means that 97 out of a hundred people who are not trans can be correctly identified as not trans, and three people who are not trans will be mistaken as trans. We say that the *true negative rate* is 97% and the *false positive rate* is 3%. 
 
 We know that the prevalence of trans people in the general population is very small. Estimates of the prevalence of trans people are highly dependent on the specific case definitions used in studies. For this analysis it doesn't matter too much which of these figures we use, because they are all so small as to not make a significant difference to the results, but for the moment let's arbitrarily pick 0.58% as the prevalence of trans people, which is an <a href="#prevalence">estimate</a> of the percentage of the population of the US who are trans. This means that prior to making any observation, if you picked someone at random from the population, the probability that you would pick a trans person is 0.58%, and the probability that you would pick a person who is not trans is 99.42%:
 
-$$
-P(\mathrm{trans}) = 0.0058,~\\
-P(\mathrm{cis}) = 0.9942
-$$
+\begin{align}
+P(\mathrm{trans}) &= 0.0058,\\
+P(\mathrm{cis}) &= 0.9942
+\end{align}
 
 This information is all we need, and is summarised on the probability tree diagram. Moving the mouse pointer over a node will trigger a pop-up display of the probability of the event represented by that node. Here are the probabilities for the four possible outcomes:
 
- * Not trans and identified as not trans: $P(-|\textrm{cis})P(\textrm{cis}) = 97\% \times 99.42\% = 96.44\%\\$
- * Not trans and identified as trans: $P(+|\textrm{cis})P(\textrm{cis}) = 3\% \times 99.42\% = 2.98\%\\$
- * Trans and identified as trans: $P(+|\textrm{trans})P(\textrm{trans}) = 99\% \times 0.58\% = 0.57\%\\$
- * Trans and identified as not trans: $P(-|\textrm{trans})P(\textrm{trans}) = 1\% \times 0.58\% = 0.01\%$
+ * Not trans and identified as not trans ($-$): 
+ 
+\begin{align}
+&= P(-|\textrm{cis})P(\textrm{cis})\\ &= 97\% \times 99.42\%\\ &= 96.44\%
+\end{align}
+
+ * Not trans and identified as trans ($+$): 
+ 
+\begin{align}
+&= P(+|\textrm{cis})P(\textrm{cis})\\ &= 3\% \times 99.42\%\\ &= 2.98\%
+\end{align}
+
+ * Trans and identified as trans ($+$): 
+ 
+\begin{align}
+&= P(+|\textrm{trans})P(\textrm{trans})\\ &= 99\% \times 0.58\%\\ &= 0.57\%
+\end{align}
+
+ * Trans and identified as not trans ($-$): 
+ 
+\begin{align}
+&= P(-|\textrm{trans})P(\textrm{trans})\\ &= 1\% \times 0.58\%\\ &= 0.01\%
+\end{align}
 
 The probability $P(+|\mathrm{trans}) = 99\%$ tells us how accurately trans people can be identified. It tells us the performance of the means to identify trans people. *It's a property of the identification method, and not of the person being identified.* What we actually want to know is something different: we want to know what is the probability that someone who is identified as trans is in fact trans. That is, what is the probability that a person is indeed trans, given that they were positively identified? We write this as: $P(\mathrm{trans}|+)$. This is not the same as $P(+|\mathrm{trans})$. This can be proved mathematically, but can be understood intuitively as follows: $P(\textrm{rain}|\textrm{umbrella})$, the probability that it is raining, given that you are carrying an open umbrella, is not the same as $P(\textrm{umbrella}|\textrm{rain})$, the probability that you are carrying an open umbrella, given that it is raining. The most likely reason for carrying an open umbrella is that it is raining, so if you are carrying an open umbrella then it is probably raining. However, if it is raining, this does not necessarily mean that then you are carrying an open umbrella! When we write $P(B|A)$, this is the *conditional probability* that an event $B$ will occur given the knowledge that an event $A$ has already occurred: *the order of events is important*. 
 
@@ -782,8 +803,17 @@ For the conditional probability $P(\mathrm{trans}|+)$, we know there was a posit
 
 Let's say that someone enters a public toilet or single-sex facility and they are judged to be trans by other users of the facility. What is the probability that they are actually trans? We can imagine repeating this experiment many times and measuring what happens. Calculating $P(\mathrm{trans}|+)$ is equivalent to calculating the percentage of people who were identified as trans who are actually trans. The two outcomes that result in a positive identification are:
 
- * Trans and identified as trans: $P(+|\textrm{trans})P(\textrm{trans}) = 99\% \times 0.58\% = 0.57\%\\$
- * Not trans and identified as trans: $P(+|\textrm{cis})P(\textrm{cis}) = 3\% \times 99.42\% = 2.98\%$
+ * Trans and identified as trans ($+$):
+ 
+\begin{align}
+&= P(+|\textrm{trans})P(\textrm{trans})\\ &= 99\% \times 0.58\%\\ &= 0.57\%
+\end{align}
+
+ * Not trans and identified as trans ($+$):
+ 
+\begin{align}
+&= P(+|\textrm{cis})P(\textrm{cis})\\ &= 3\% \times 99.42\%\\ &= 2.98\%
+\end{align}
 
 The probability that either of these events occur is the sum of their individual probabilities:
 $$
@@ -793,9 +823,9 @@ We're interested in the outcome in which a trans person is observed and they are
 $$
 P(+|\textrm{trans})P(\textrm{trans})
 $$
-Therefore, the fraction (or percentage) of those identified as trans who are actually trans is:
+Therefore, the fraction (or percentage) of those identified as trans who are actually trans, $P(\mathrm{trans}|+)$, is:
 $$
-P(\mathrm{trans}|+) = \frac{P(+|\textrm{trans})P(\textrm{trans})}{P(+|\textrm{trans})P(\textrm{trans}) + P(+|\textrm{cis})P(\textrm{cis})}
+\frac{P(+|\textrm{trans})P(\textrm{trans})}{P(+|\textrm{trans})P(\textrm{trans}) + P(+|\textrm{cis})P(\textrm{cis})}
 $$
 As an aside, this is just a specialised case of [Bayes' Theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem)$^{14}$:
 $$
@@ -803,10 +833,10 @@ P(A|B) = \frac{P(B|A)P(A)}{\sum_i{P(B|A_i)P(A_i)}}
 $$
 Bayes' Theorem allows us to make probability calculations of the form: what is the probability of $A$ given that $B$ is true. This is textbook mathematics that's been known since [1763](https://royalsocietypublishing.org/doi/10.1098/rstl.1763.0053) and has enormous importance in the field of statistics$^{15}$. Rather than simply state the theorem without proof and grind through the mathematics, what we've just done is derive what we need from scratch, using the simplest of ingredients, and as a side-effect provide a gentle introduction to Bayes' Theorem.
 
-For our specific example, we have:
+For our specific example, we can substitute the probabilities we obtained earlier into our equation to calculate $P(\mathrm{trans}|+)$:
 
 \begin{align}
-P(\mathrm{trans}|+) &= \frac{P(+|\mathrm{trans})P(\mathrm{trans})}{P(+|\mathrm{trans})P(\mathrm{trans})+P(+|\mathrm{cis})P(\mathrm{cis})}\\ &\\ &= \frac{0.99\times0.0058}{0.99\times0.0058 + 0.03\times0.9942}\\ &\\ &= 0.161
+&= \frac{P(+|\mathrm{trans})P(\mathrm{trans})}{P(+|\mathrm{trans})P(\mathrm{trans})+P(+|\mathrm{cis})P(\mathrm{cis})}\\ &\\ &= \frac{0.99\times0.0058}{0.99\times0.0058 + 0.03\times0.9942}\\ &\\ &= 0.161
 \end{align}
 
 So the probability that a person is trans, given that they were recognised as trans, is only 16.1%. This may seem surprising, given the 99% accuracy to identify trans people. The result is small because the prevalence of trans people in the population is so tiny.
@@ -814,14 +844,15 @@ So the probability that a person is trans, given that they were recognised as tr
 Similarly, the probability that a person is not trans, given they were positively identified, $P(\mathrm{cis}|+)$, is:
 
 \begin{align}
-P(\mathrm{cis}|+) &= \frac{P(+|\mathrm{cis}) P(\mathrm{cis})}{P(+|\mathrm{cis}) P(\mathrm{cis}) + P(+|\mathrm{trans}) P(\mathrm{trans})}\\ &\\ &= \frac{0.03\times0.9942}{0.03\times0.9942 + 0.99\times0.0058}\\ &\\ &= 0.839
+&= \frac{P(+|\mathrm{cis}) P(\mathrm{cis})}{P(+|\mathrm{cis}) P(\mathrm{cis}) + P(+|\mathrm{trans}) P(\mathrm{trans})}\\ &\\ &= \frac{0.03\times0.9942}{0.03\times0.9942 + 0.99\times0.0058}\\ &\\ &= 0.839
 \end{align}
 
 We can check our result by noting that if a person has been positively identified, the only alternative to the outcome in which they are not trans is the outcome in which they are trans, therefore:
 
-$$
-P(\mathrm{cis}|+) = 1 - P(\mathrm{trans}|+) = 1 - 0.161 = 0.839.
-$$
+\begin{align}
+P(\mathrm{cis}|+) &= 1 - P(\mathrm{trans}|+)\\ &= 1 - 0.161\\ &= 0.839.
+\end{align}
+
 Thus we have shown that women who are not trans will be misidentified as trans 83.9% of the time. **In this scenario, five times more women that are not trans are misidentified as trans than trans women are correctly identified!**
 
 *****
@@ -920,7 +951,7 @@ embed_youtube("vo42M8MdznY")
 
 ```{r mobile_video}
 # Smaller version for mobile:
-embed_youtube("vo42M8MdznY", width = 220)
+embed_youtube("vo42M8MdznY", width = 300)
 ```
 > YouTube video posted 12 April 2016 by Media Matters for America, shortly after North Carolina passed the Public Facilities Privacy & Security Act (HB2), which was partially repealed on 30 March 2017.
 
