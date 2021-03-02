@@ -302,8 +302,6 @@ Bathroom bills have no practical benefit for women {data-navmenu="Menu"}
 Column {.tabset .tabset-fade}
 -----------------------------------------
 
-### Ratio of incorrect to correct identifications
-
 ```{r out1}
 # Create the base figure and steps for the first plot:
 out1 <- create(
@@ -324,11 +322,10 @@ out1 <- create(
   cbar_title = paste0(
     "How many more\n",
     "times people who\n",
-    "are not trans\n",
-    "are misidentified\n",
-    "as trans than\n",
-    "trans people are\n",
-    "correctly identified"
+    "are not trans are\n",
+    "mistaken to be\n",
+    "trans than trans\n",
+    "people are ID'd"
   ), 
   tickprefix = NULL,
   ticksuffix = "×",
@@ -350,8 +347,8 @@ out1$fig %>%
       list(
         active = p - 1, # Subtract one for the blank plot at the start
         currentvalue = list(
-          prefix = "Percentage of population who are trans: ",
-          suffix = "<br>(Values < 0.36% or > 0.95% are unlikely to be plausible)"
+          prefix = "Trans prevalence: ",
+          suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
         ),
         steps = out1$steps,
         pad = list(t = 100, r = 0, b = 0, l = 0),
@@ -369,7 +366,6 @@ fig1 %>%
     modeBarButtons = list(
       list(
         "toImage",
-        # "resetScale2d",
         "toggleSpikelines")
     ), 
     displaylogo = FALSE, # Turn off the plotly logo
@@ -380,10 +376,87 @@ fig1 %>%
   {.} -> fig1 # Done
 ```
 
-```{r show_fig1, preview=TRUE}
-fig1
+```{r mobile_out1}
+# Create the base figure and steps for the first plot:
+m_out1 <- create(
+  z_var = "rate", 
+  hovertemplate = paste0(
+    "%{z:.1f}×",
+    "<extra></extra>"
+  ), 
+  plot_title = paste0(
+    "Ratio of number of people misidentified as trans\n",
+    "to number of people correctly identified as trans\n&nbsp;"
+  ),
+  cbar_title = paste0(
+    "How many more\n",
+    "times people who\n",
+    "are not trans are\n",
+    "mistaken to be\n",
+    "trans than trans\n",
+    "people are ID'd"
+  ), 
+  tickprefix = NULL,
+  ticksuffix = "×",
+  cbar_pal = "C", 
+  cbar_tickformat = "",
+  minZ = NULL, 
+  maxZ = NULL,
+  cbar_x = 1, 
+  cbar_y = 1, 
+  cbar_len = 1
+)
 ```
 
+```{r mobile_slider1}
+# Add slider control to plot:
+m_out1$fig %>%
+  layout(
+    sliders = list(
+      list(
+        active = p - 1, # Subtract one for the blank plot at the start
+        currentvalue = list(
+          prefix = "Trans prevalence: ",
+          suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
+        ),
+        steps = out1$steps,
+        pad = list(t = 100, r = -70, b = 0, l = -70),
+        scene = list(x = 1, y = 1, z = 1)
+      )
+    )
+  ) %>% 
+  {.} -> m_fig1
+```
+
+```{r mobile_plot1}
+m_fig1 %>% 
+  config(
+    # Control which modebar buttons we want to show the user:
+    modeBarButtons = list(
+      list(
+        "toImage",
+        "toggleSpikelines")
+    ), 
+    displaylogo = FALSE, # Turn off the plotly logo
+    toImageButtonOptions = list(filename = "plotOutput1")
+  ) %>% 
+  # Set the margins and allow the plot to autosize to the user's display:
+  layout(margin = margins, autosize = TRUE) %>% 
+  {.} -> m_fig1 # Done
+```
+
+### Ratio of incorrect to correct identifications {.no-mobile}
+
+```{r show_fig1}
+fig1
+```
+> Move your mouse pointer over the plot to see the ratio of mistaken identifications to correct identifications. Higher numbers on labelled contours and lighter colours represent worsening performance.
+
+### Ratio of incorrect to correct identifıcations {.mobile}
+
+```{r mobile_show_fig1}
+m_fig1
+```
 > Move your mouse pointer over the plot to see the ratio of mistaken identifications to correct identifications. Higher numbers on labelled contours and lighter colours represent worsening performance.
 
 ### (Mis)identification probabilities {.no-mobile}
@@ -480,8 +553,8 @@ fig2 %>%
       list(
         active = p - 1, # Subtract one for the blank plot at the start
         currentvalue = list(
-          prefix = "Percentage of population who are trans: ",
-          suffix = "<br>(Values < 0.36% or > 0.95% are unlikely to be plausible)"
+          prefix = "Trans prevalence: ",
+          suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
         ),
         steps = out2a$steps,
         pad = list(t = 100, r = 0, b = 0, l = 0),
@@ -674,7 +747,8 @@ collapsibleTreeNetwork(
   collapsed = FALSE,
   attribute = "percentage", 
   nodeSize = "nodesize", 
-  fontSize = 13, 
+  fontSize = 14,
+  width = 320,
   fill = "colour",
   tooltipHtml = "tooltip"
 ) -> probability_tree
@@ -916,7 +990,7 @@ If bathroom bills are brought in, without a doubt, cis women who don't conform t
 Column
 -----------------------------------------
 
-### Here's the truth about the anti-LGBT "bathroom predator" myth
+### Here's the truth about the anti-LGBT "bathroom predator" myth {.no-mobile}
 
 ```{r video}
 embed_youtube("vo42M8MdznY")
