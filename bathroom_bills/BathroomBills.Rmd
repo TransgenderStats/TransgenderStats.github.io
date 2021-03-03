@@ -535,13 +535,13 @@ Column {data-width=220}
 
 These two probabilities can be equal, but they are not necessarily so. There is no reason that they should be the same; it could be that one group of people is easier to classify than the other. Both probabilities are expressed as percentages. Both axes start at 50% probability, which is equivalent to predicting someone's gender identity by flipping a fair coin.
 
+<!--
 <b>Colour:</b> the ratio of the number of people who are not trans who are misidentified as trans to the number of trans people who are correctly identified as trans. This is equivalent to the ratio of the probability that a person who is not trans is mistakenly identified as trans to the probability that a person who is trans is correctly identified as trans. See legend.
 
 <b>Contours:</b> represent lines of equal ratio.
+-->
 
 <b>Slider:</b> can be used to vary the trans prevalence and explore different scenarios. The default value corresponds to the [best estimate](http://williamsinstitute.law.ucla.edu/wp-content/uploads/How-Many-Adults-Identify-as-Transgender-in-the-United-States.pdf) of trans prevalence in the US population by the Williams Institute at UCLA School of Law$^1$. The lower and upper limits represent extreme values and were chosen to more than fully contain the range of plausible values for trans prevalence.
-
-Moving the mouse pointer over the plot will display the ratio of the number of mistaken identifications to the number of correct identifications.
 
 ### Details
 
@@ -580,7 +580,7 @@ It may be surprising to the reader that women who are not trans will be incorrec
 You can't always tell if someone is trans {data-navmenu="Menu" data-orientation=rows}
 =====================================
 
-<b>When someone is perceived to be trans, what is the probability that they are actually trans?</b>
+<b>You can't always tell if someone is trans</b>
 
 Row
 -----------------------------------------
@@ -856,15 +856,15 @@ $$
 $$
 Now let's consider *all possible scenarios* for any specified trans prevalence by assuming a continuum of values for $P(+|\mathrm{trans})$ and $P(-|\mathrm{cis})$. Each pair of values defines the accuracy with which people who are trans, and those who are not, can be identified. We can plot these values as points in a graph, $P(+|\mathrm{trans})$ on the horizontal axis and $P(-|\mathrm{cis})$ on the  vertical axis, and colour them by how many more times people who are not trans are misidentified than trans women are identified. We can also plot contour lines that can be annotated to show this information more clearly. This is how we obtained the plot on the first page.
 
-When a trans person uses a public toilet, who is at risk? {data-navmenu="Menu"}
+Bathroom bills actively harm trans people {data-navmenu="Menu"}
 =========================================
 
-<b>When a trans person uses a public toilet, who is at risk?</b>
+<b>Bathroom bills actively harm trans people</b>
 
 Column
 -----------------------------------------
 
-### Summary
+### When a trans person uses a public toilet, who is at risk? 
 
 Lutherans:
 
