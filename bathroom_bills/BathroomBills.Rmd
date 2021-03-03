@@ -4,6 +4,8 @@ output:
   flexdashboard::flex_dashboard:
     social: menu
     source_code: embed
+    includes:
+      in_header: header.html
 header-includes:
   - \usepackage{amsmath,mathpazo}
 ---
@@ -60,7 +62,7 @@ bayes <- function(`P(B|A)`, `P(A)`, `P(B|A')`) {
 ```{r configuration}
 # Sets how finely we want to plot the data:
 `grid step size` <- 0.01 # Step size for computing grid of values
-`prevalence step size` <- 0.1 # Step size for computing range of trans prevalences
+`prevalence step size` <- 0.05 # Step size for computing range of trans prevalences
 `prevalence values` <- seq(0.1, 3, `prevalence step size`) / 100 # Trans prevalences
 `P(+|trans) values` <- seq(0.5, 1.0, `grid step size`) # List of values for P(+|trans)
 `P(-|cis) values` <- seq(0.5, 1.0, `grid step size`)  # List of values for P(-|cis)
@@ -379,13 +381,14 @@ fig1 %>%
 fig1
 ```
 
-> Move your mouse pointer over the plot to see how many more times people who are not trans are mistaken to be trans than trans people are correctly identified. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentate of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
+> Move your mouse pointer over the plot to see how many more times people who are not trans are mistaken to be trans than trans people are correctly identified. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentage of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
 
-```{r eval=FALSE, include=FALSE}
+```{r Twitter, eval=FALSE, include=FALSE}
+# remotes::install_github("hrbrmstr/widgetcard") # Uncomment to install
 library(widgetcard)
 fig1 %>% 
   card_widget(
-    output_dir = "~/widgets/tc",
+    output_dir = "./tc",
     name_prefix = "tc",
     preview_img = "preview.png",
     html_title = "Why bathroom bills are bad",
@@ -536,7 +539,7 @@ fig2 %>%
 fig2
 ```
 
-> Move your mouse pointer over the plot to see the probabilities for mistaken identifications and correct identifications. Use the slider to vary the percentage of the population who are trans. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentate of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
+> Move your mouse pointer over the plot to see the probabilities for mistaken identifications and correct identifications. Use the slider to vary the percentage of the population who are trans. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentage of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
 
 Column {data-width=220}
 -----------------------------------------
@@ -927,7 +930,7 @@ Further, some "masculine looking" women have been denied access and harassed or 
 A 2017 study gauging public opinion about safety and privacy when trans women use female bathrooms found that non-trans men are 1.55 times more likely to express concern about safety and privacy than non-trans women. Moreover, the study found that when expressing concern non-trans women are around four times as likely than non-trans men to assert that trans women do not directly cause their safety and privacy concerns. Non-trans men were found to be around 1.5 times as likely as non-trans women to assert that trans women directly cause their safety and privacy concerns. Essentially, the study found that it is mostly non-trans men --- *not women* --- who are concerned about safety and privacy when trans women use female bathrooms. This suggests that the instigators for policing women's spaces are chiefly non-trans men. [stones]
 
 
-From a scientific and evidence-based perspective, there is no current evidence that granting transgender individuals access to gender-corresponding restrooms results in an increase in sexual offenses.[Sorrentino]
+From a scientific and evidence-based perspective, there is no current evidence that granting transgender individuals access to gender-corresponding restrooms results in an increase in sexual offences.[Sorrentino]
 
 
 Irrational fears of trans women leads to harassment of everyone that doesn't conform to rigidly held western beauty standards.
