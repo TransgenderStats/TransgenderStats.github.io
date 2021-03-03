@@ -4,8 +4,6 @@ output:
   flexdashboard::flex_dashboard:
     social: menu
     source_code: embed
-    includes:
-      in_header: header.html
 header-includes:
   - \usepackage{amsmath,mathpazo}
 ---
