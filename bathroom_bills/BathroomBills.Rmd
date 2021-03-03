@@ -289,7 +289,7 @@ margins <- list(
 Bathroom bills have no practical benefit for women {data-navmenu="Menu"}
 =========================================
 
-<b>Why "protecting" single-sex spaces has no practical benefit for women</b>
+<b>Bathroom bills have no practical benefit for women</b>
 
 Column {.tabset .tabset-fade}
 -----------------------------------------
@@ -298,23 +298,19 @@ Column {.tabset .tabset-fade}
 # Create the base figure and steps for the first plot:
 out1 <- create(
   z_var = "rate", 
+  # Detailed information (tooltip too large for mobile):
   # hovertemplate = paste0(
-  #   "Probability to correctly identify a person as:\n",
-  #   "\t • Trans, given that they are trans: %{x}<br>",
-  #   "\t • Not trans, given that they are not trans: %{y}<br>",
-  #   "How many more times people who are not trans\n",
-  #   "are misidentified as trans than trans people are\n",
-  #   "correctly identified: %{z:.1f}×",
+  #   "Accuracy for identifying a person who is:\n",
+  #   "\t • Trans: %{x}<br>",
+  #   "\t • Not trans: %{y}<br>",
+  #   "How many more times people who\n",
+  #   "are not trans are mistaken to be trans\n",
+  #   "than trans people are identified: %{z:.1f}×",
   #   "<extra>%{fullData.name}</extra>"
-  # ), 
+  # ),
   hovertemplate = paste0(
-    "Accuracy for identifying a person who is:\n",
-    "\t • Trans: %{x}<br>",
-    "\t • Not trans: %{y}<br>",
-    "How many more times people who\n",
-    "are not trans are mistaken to be trans\n",
-    "than trans people are identified: %{z:.1f}×",
-    "<extra>%{fullData.name}</extra>"
+    "%{x}, %{y}",
+    "<extra>%{z:.1f}×</extra>"
   ),
   plot_title = paste0(
     "Ratio of number of people misidentified as trans\n",
@@ -352,7 +348,7 @@ out1$fig %>%
           suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
         ),
         steps = out1$steps,
-        pad = list(t = 100, r = -50, b = 0, l = -50),
+        pad = list(t = 100, r = -75, b = 0, l = -75),
         scene = list(x = 1, y = 1, z = 1)
       )
     )
@@ -382,7 +378,8 @@ fig1 %>%
 ```{r show_fig1}
 fig1
 ```
-> Move your mouse pointer over the plot to see the ratio of mistaken identifications to correct identifications. Higher numbers on labelled contours and lighter colours represent worsening performance.
+
+> Move your mouse pointer over the plot to see how many more times people who are not trans are mistaken to be trans than trans people are correctly identified. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentate of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
 
 ### (Mis)identification probabilities {.no-mobile}
 
@@ -390,14 +387,19 @@ fig1
 # Create the base figure and steps for the first subplot of the second plot:
 out2a <- create(
   z_var = "P(cis|+)", 
+  # Detailed information:
+  # hovertemplate = paste0(
+  #   "Accuracy for identifying a person who is:\n",
+  #   "\t • Trans: %{x}<br>",
+  #   "\t • Not trans: %{y}<br>",
+  #   "Probability that a person perceived to be<br>",
+  #   "trans is actually not trans: %{z:.2%}",
+  #   "<extra>%{fullData.name}</extra>"
+  # ), 
   hovertemplate = paste0(
-    "Accuracy for identifying a person who is:\n",
-    "\t • Trans: %{x}<br>",
-    "\t • Not trans: %{y}<br>",
-    "Probability that a person perceived to be<br>",
-    "trans is actually not trans: %{z:.2%}",
-    "<extra>%{fullData.name}</extra>"
-  ), 
+    "%{x}, %{y}",
+    "<extra>%{z:.2%}</extra>"
+  ),
   plot_title = "", 
   cbar_title = paste0(
     "Probability that a\n",
@@ -422,14 +424,19 @@ out2a <- create(
 # Create the base figure and steps for the second subplot of the second plot:
 out2b <- create(
   z_var = "P(trans|+)", 
+  # Detailed information:
+  # hovertemplate = paste0(
+  #   "Accuracy for identifying a person who is:\n",
+  #   "\t • Trans: %{x}<br>",
+  #   "\t • Not trans: %{y}<br>",
+  #   "Probability that a person perceived to be<br>",
+  #   "trans is actually not trans: %{z:.2%}",
+  #   "<extra>%{fullData.name}</extra>"
+  # ), 
   hovertemplate = paste0(
-    "Accuracy for identifying a person who is:\n",
-    "\t • Trans: %{x}<br>",
-    "\t • Not trans: %{y}<br>",
-    "Probability that a person perceived to be<br>",
-    "trans is actually trans: %{z:.2%}",
-    "<extra>%{fullData.name}</extra>"
-  ), 
+    "%{x}, %{y}",
+    "<extra>%{z:.2%}</extra>"
+  ),
   plot_title = paste0(
     "Probabilities of misidentification as trans\n",
     "and correct identification as trans"
@@ -482,7 +489,7 @@ fig2 %>%
           suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
         ),
         steps = out2a$steps,
-        pad = list(t = 100, r = -50, b = 0, l = -50),
+        pad = list(t = 100, r = -75, b = 0, l = -75),
         scene = list(x = 1, y = 1, z = 1)
       )
     )
@@ -497,7 +504,6 @@ fig2 %>%
     modeBarButtons = list(
       list(
         "toImage",
-        # "resetScale2d",
         "toggleSpikelines")
     ), 
     displaylogo = FALSE, # Turn off the plotly logo
@@ -512,7 +518,7 @@ fig2 %>%
 fig2
 ```
 
-> Move your mouse pointer over the plot to see the probabilities for mistaken identifications and correct identifications.
+> Move your mouse pointer over the plot to see the probabilities for mistaken identifications and correct identifications. Use the slider to vary the percentage of the population who are trans. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentate of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
 
 Column {data-width=220}
 -----------------------------------------
@@ -672,8 +678,7 @@ collapsibleTreeNetwork(
   collapsed = FALSE,
   attribute = "percentage", 
   nodeSize = "nodesize", 
-  fontSize = 14,
-  width = 320,
+  fontSize = 12,
   fill = "colour",
   tooltipHtml = "tooltip"
 ) -> probability_tree
@@ -682,7 +687,7 @@ collapsibleTreeNetwork(
 ```{r fig3}
 probability_tree
 ```
-> Move your mouse pointer over the nodes in the tree to see the probabilities for each outcome. The example shown is for a trans prevalence of 0.58%, 99% accuracy to identify trans people, and 97% accuracy to identify people who are not trans.
+> Move your mouse pointer over the nodes in the tree to see the probabilities for each outcome. Click to collapse/expand nodes. The example shown is for a trans prevalence of 0.58%, 99% accuracy to identify trans people, and 97% accuracy to identify people who are not trans.
 
 Row
 -----------------------------------------
@@ -697,7 +702,7 @@ The probability tree diagram shows all the possible events. The size of the node
 
 To calculate the probability that a person is trans (or not), given that they were perceived to be trans (or not), divide the probability of the outcome of interest by the sum of the probabilities for the two possible outcomes corresponding to how the person was perceived (*perceived as trans* or *perceived as not trans*). See the discussion for more details. 
 
-### Details
+### When someone is perceived to be trans, what is the probability that they are actually trans?
 
 <a name="top2"></a>
 In this section:<br>
@@ -746,26 +751,26 @@ P(\mathrm{cis}) &= 0.9942
 
 This information is all we need, and is summarised on the probability tree diagram. Moving the mouse pointer over a node will trigger a pop-up display of the probability of the event represented by that node. Here are the probabilities for the four possible outcomes:
 
- * Not trans and perceived to be not trans: 
- 
+* Not trans and perceived to be not trans: 
+
 \begin{align}
 P(-|\textrm{cis})P(\textrm{cis}) &= 97\% \times 99.42\%\\ &= 96.44\%
 \end{align}
 
- * Not trans and perceived to be trans: 
- 
+* Not trans and perceived to be trans: 
+
 \begin{align}
 P(+|\textrm{cis})P(\textrm{cis}) &= 3\% \times 99.42\%\\ &= 2.98\%
 \end{align}
 
- * Trans and perceived to be trans: 
- 
+* Trans and perceived to be trans: 
+
 \begin{align}
 P(+|\textrm{trans})P(\textrm{trans}) &= 99\% \times 0.58\%\\ &= 0.57\%
 \end{align}
 
- * Trans and perceived to be not trans: 
- 
+* Trans and perceived to be not trans: 
+
 \begin{align}
 P(-|\textrm{trans})P(\textrm{trans}) &= 1\% \times 0.58\%\\ &= 0.01\%
 \end{align}
@@ -778,14 +783,14 @@ For the conditional probability $P(\mathrm{trans}|+)$, we know there was a posit
 
 Let's say that someone enters a public toilet or single-sex facility and they are judged to be trans by other users of the facility. What is the probability that they are actually trans? We can imagine repeating this experiment many times and measuring what happens. Calculating $P(\mathrm{trans}|+)$ is equivalent to calculating the percentage of people who were perceived to be trans who are actually trans. The two outcomes that result in a positive identification are:
 
- * Trans and perceived to be trans:
- 
+* Trans and perceived to be trans:
+
 \begin{align}
 P(+|\textrm{trans})P(\textrm{trans}) &= 99\% \times 0.58\%\\ &= 0.57\%
 \end{align}
 
- * Not trans and perceived to be trans:
- 
+* Not trans and perceived to be trans:
+
 \begin{align}
 P(+|\textrm{cis})P(\textrm{cis}) &= 3\% \times 99.42\%\\ &= 2.98\%
 \end{align}
@@ -851,7 +856,7 @@ $$
 $$
 Now let's consider *all possible scenarios* for any specified trans prevalence by assuming a continuum of values for $P(+|\mathrm{trans})$ and $P(-|\mathrm{cis})$. Each pair of values defines the accuracy with which people who are trans, and those who are not, can be identified. We can plot these values as points in a graph, $P(+|\mathrm{trans})$ on the horizontal axis and $P(-|\mathrm{cis})$ on the  vertical axis, and colour them by how many more times people who are not trans are misidentified than trans women are identified. We can also plot contour lines that can be annotated to show this information more clearly. This is how we obtained the plot on the first page.
 
-Who is at risk? {data-navmenu="Menu"}
+When a trans person uses a public toilet, who is at risk? {data-navmenu="Menu"}
 =========================================
 
 <b>When a trans person uses a public toilet, who is at risk?</b>
