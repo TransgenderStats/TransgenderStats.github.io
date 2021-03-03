@@ -60,7 +60,7 @@ bayes <- function(`P(B|A)`, `P(A)`, `P(B|A')`) {
 ```{r configuration}
 # Sets how finely we want to plot the data:
 `grid step size` <- 0.01 # Step size for computing grid of values
-`prevalence step size` <- 0.05 # Step size for computing range of trans prevalences
+`prevalence step size` <- 0.1 # Step size for computing range of trans prevalences
 `prevalence values` <- seq(0.1, 3, `prevalence step size`) / 100 # Trans prevalences
 `P(+|trans) values` <- seq(0.5, 1.0, `grid step size`) # List of values for P(+|trans)
 `P(-|cis) values` <- seq(0.5, 1.0, `grid step size`)  # List of values for P(-|cis)
