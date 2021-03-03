@@ -348,7 +348,7 @@ out1$fig %>%
           suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
         ),
         steps = out1$steps,
-        pad = list(t = 100, r = -75, b = 0, l = -75),
+        pad = list(t = 75, r = -75, b = 0, l = -75),
         scene = list(x = 1, y = 1, z = 1)
       )
     )
@@ -380,6 +380,24 @@ fig1
 ```
 
 > Move your mouse pointer over the plot to see how many more times people who are not trans are mistaken to be trans than trans people are correctly identified. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentate of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
+
+```{r eval=FALSE, include=FALSE}
+library(widgetcard)
+fig1 %>% 
+  card_widget(
+    output_dir = "~/widgets/tc",
+    name_prefix = "tc",
+    preview_img = "preview.png",
+    html_title = "Why bathroom bills are bad",
+    card_twitter_handle = "@TransgenderStat",
+    card_title = "Why bathroom bills are bad",
+    card_description = "Interact in Twitter by tapping the preview image! (On web apps)",
+    card_image_url_prefix = "https://transgenderstats.github.io/bathroom_bills/tc/",
+    card_player_url_prefix = "https://transgenderstats.github.io/bathroom_bills/tc/",
+    card_player_width = 480,
+    card_player_height = 480
+  ) -> arch_fil
+```
 
 ### (Mis)identification probabilities {.no-mobile}
 
