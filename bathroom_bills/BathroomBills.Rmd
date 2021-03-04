@@ -2,6 +2,8 @@
 title: "Why bathroom bills are bad"
 output: 
   flexdashboard::flex_dashboard:
+    navbar:
+      - { title: "Transgender Stats", href: "https://twitter.com/TransgenderStat", align: right }
     social: menu
     source_code: embed
 header-includes:
@@ -382,6 +384,12 @@ fig1
 > Move your mouse pointer over the plot to see how many more times people who are not trans are mistaken to be trans than trans people are correctly identified. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentage of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
 
 ```{r Twitter, eval=FALSE, include=FALSE}
+# This code chunk is only used to produce the Twitter Player Card; it's not used
+# in the creation of the webpage. Getting the card to work requires hacking the
+# HTML to insert the meta tags, which isn't easily reproducible, so we only
+# include the code here in case others want to experiment with interactive
+# Twitter cards.
+
 # remotes::install_github("hrbrmstr/widgetcard") # Uncomment to install
 library(widgetcard)
 fig1 %>% 
@@ -706,22 +714,25 @@ collapsibleTreeNetwork(
 ```{r fig3}
 probability_tree
 ```
-> Move your mouse pointer over the nodes in the tree to see the probabilities for each outcome. Click to collapse/expand nodes. The example shown is for a trans prevalence of 0.58%, 99% accuracy to identify trans people, and 97% accuracy to identify people who are not trans.
+
+> Move your mouse pointer over the nodes in the tree to see the probabilities for each outcome. Click to collapse/expand nodes. The example shown is for a trans prevalence of 0.58%, 99% accuracy to identify trans people, and 97% accuracy to identify people who are not trans. 
 
 Row
 -----------------------------------------
 
 ### How to use and interpret
 
-If a person is perceived to be trans, this does not necessarily mean that the person is actually trans. Here we demonstrate, with a simple example, how to calculate the probability that a person perceived to be trans is actually trans. This will help the reader to understand why bathroom bills do not benefit women. Although the mathematics is not complicated, we provide an interactive diagram to help the reader more easily understand the calculation.
+The probability tree diagram shows all the possible events. The size of the nodes provides an indication of the probability of the event that it corresponds to: large nodes indicate large probability, small nodes indicate small probability. A person from the general population may be either trans or not trans. If the person is trans, they may be perceived to be trans ("positive identification"), or they may be perceived to be not trans ("negative identification"), and similarly if the person is not trans. This results in four possible outcomes, each with different probabilities, which we calculate by multiplying the probabilities along each branch of the probability tree. The probabilities for all the outcomes sum to 100%, as they must, because all possible outcomes are exhausted. The ends of the branches represent what can be observed and known with certainty. Whether a person is trans or not is not directly observable and can only be inferred with some uncertainty.
+
+To calculate the probability that a person is trans (or not), given that they were perceived to be trans (or not), divide the probability of the outcome of interest by the sum of the probabilities for the two possible outcomes corresponding to how the person was perceived ("Perceived as trans" or "Perceived as not trans").
+
+### When someone is perceived to be trans, what is the probability that they are actually trans?
+
+If a person is perceived to be trans, this does not necessarily mean that the person is actually trans. Here we demonstrate, with a simple example, how to calculate the probability that a person perceived to be trans is actually trans.
 
 **The reader does not need to understand algebra to understand the calculation; we will walk through the calculation step-by-step using the probability tree diagram that will make the calculation exceptionally simple: the mathematics required to understand this calculation (percentages and basic concepts of probability) is typically taught to children in the [US](http://www.corestandards.org/assets/CCSSI_Math%20Standards.pdf)$^{11}$ and [UK](https://www.gov.uk/government/publications/national-curriculum-in-england-mathematics-programmes-of-study/national-curriculum-in-england-mathematics-programmes-of-study)$^{12}$ by age 14.**
 
-The probability tree diagram shows all the possible events. The size of the nodes provides an indication of the probability of the event that it corresponds to: large nodes indicate large probability, small nodes indicate small probability. A person from the general population may be either trans or not trans. If the person is trans, they may be perceived to be trans ("positive identification"), or they may be perceived to be not trans ("negative identification"), and similarly if the person is not trans. This results in four possible outcomes, each with different probabilities, which we calculate by multiplying the probabilities along each branch of the probability tree. The probabilities for all the outcomes sum to 100%, as they must, because all possible outcomes are exhausted. The ends of the branches represent what can be observed and known with certainty. Whether a person is trans or not is not directly observable and can only be inferred with some uncertainty.
-
-To calculate the probability that a person is trans (or not), given that they were perceived to be trans (or not), divide the probability of the outcome of interest by the sum of the probabilities for the two possible outcomes corresponding to how the person was perceived (*perceived as trans* or *perceived as not trans*). See the discussion for more details. 
-
-### When someone is perceived to be trans, what is the probability that they are actually trans?
+*****
 
 <a name="top2"></a>
 In this section:<br>
@@ -852,7 +863,7 @@ We can check our result by noting that if a person has been positively identifie
 P(\mathrm{cis}|+) &= 1 - P(\mathrm{trans}|+)\\ &= 1 - 0.161\\ &= 0.839.
 \end{align}
 
-Thus we have shown that women who are not trans will be misidentified as trans 83.9% of the time. **In this scenario, five times more women that are not trans are misidentified as trans than trans women are correctly identified!**
+Thus we have shown that women who are not trans will be misidentified as trans 83.9% of the time. **In this scenario, five times more women who are not trans are misidentified as trans than trans women are correctly identified!**
 
 *****
 
@@ -1124,7 +1135,8 @@ State Standards Initiative. Archived from [the original](http://www.corestandard
 #  yaml              2.2.1   2020-02-01 [1] CRAN (R 3.6.3)
 ```
 
-```{r pfp}
+```{r author}
+# Transgender Stats (@TransgenderStat) is Drew (@PropertyOfMyCat)
 # %%%###(((#(%@@@@@@@%#((//((/#(((((((#%%&%%&%%%%####(%#((#######(##((##(###%%%#%#
 # %%%%%####/(&@@@@@@@@(((#(((((((/((%&&&%%%%%%%%#%%#%#&#%####((###(((#(#(#((((#(##
 # %%###(((((#%@@@@@@@@#(##((@@@@@@&@@@@@@@@@@&&&&%%%&%&%&#%###(###########((((#(((
@@ -1158,5 +1170,6 @@ State Standards Initiative. Archived from [the original](http://www.corestandard
 # ******************/***/,**/(///********/&&&&(/*,...,#%%%%%%%%%%%#&&&%&%%%%%%%%%%
 # ******************/******,,//////**//(%&&%&&&%(//*//#//%##&#%%%%%&%%%%%%%%%%%%%%
 ```
+
 
 
