@@ -47,7 +47,22 @@ require(plotly) # For interactive plots
 require(viridis) # For colour blind friendly colour palettes
 require(collapsibleTree) # For plotting probability trees
 require(formattable) # For nicely formatted numbers
-require(vembedr) # For embedding videos
+```
+
+```{css}
+.video-responsive{
+  overflow:hidden;
+  padding-bottom:56.25%;
+  position:relative;
+  height:0;
+}
+.video-responsive iframe{
+  left:0;
+  top:0;
+  height:100%;
+  width:100%;
+  position:absolute;
+}
 ```
 
 ```{r bayes}
@@ -218,10 +233,14 @@ create <- function(z_var, # What we want to plot on the z-axis
       showscale = TRUE, # Show the legend
       # Format the legend:
       colorbar = list(
-        title = cbar_title, # Set the colour bar title
+        title = list(
+          text = cbar_title, # Set the colour bar title
+          font = list(size = 12)
+        ),
         x = cbar_x, # Set the colour bar horizontal position
         y = cbar_y, # Set the colour bar vertical position
         len = cbar_len, # Set the colour bar length
+        tickfont = list(size = 12),
         tickprefix = tickprefix, # Set the z-axis value prefix
         ticksuffix = ticksuffix, # Set the z-axis value prefix
         tickformat = cbar_tickformat # Set z-axis values to be percentages if needed
@@ -236,24 +255,30 @@ create <- function(z_var, # What we want to plot on the z-axis
           yref = 'y', 
           x = 0.5, 
           y = 0.9725,
-          font = list(size = 15)
+          font = list(size = 13)
         ),
         xaxis = list(
           fixedrange = TRUE,
-          title = paste0(
-            # P(+|trans):
-            "Accuracy for identifying\n",
-            "a person who is trans"
+          title = list(
+            text = paste0(
+              # P(+|trans):
+              "Accuracy for identifying\n",
+              "a person who is trans"
+            ),
+            font = list(size = 13)
           ),
           ticksuffix = "%"
         ),
         yaxis = list(
           fixedrange = TRUE,
           automargin = TRUE,
-          title = paste0(
-            # P(-|cis):
-            "Accuracy for identifying\n",
-            "a person who is not trans\n&nbsp;"
+          title = list(
+            text = paste0(
+              # P(-|cis):
+              "Accuracy for identifying\n",
+              "a person who is not trans\n&nbsp;"
+            ),
+            font = list(size = 13)
           ),
           ticksuffix = "%"
         )
@@ -282,7 +307,7 @@ create <- function(z_var, # What we want to plot on the z-axis
 margins <- list(
   l = 50,
   r = 50,
-  b = 100, # We need extra space for the slider
+  b = 90, # We need extra space for the slider
   t = 50,
   pad = 4
 )
@@ -350,7 +375,7 @@ out1$fig %>%
           suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
         ),
         steps = out1$steps,
-        pad = list(t = 75, r = -75, b = 0, l = -75),
+        pad = list(t = 90, r = -75, b = 0, l = -75),
         scene = list(x = 1, y = 1, z = 1)
       )
     )
@@ -408,11 +433,11 @@ fig1 %>%
   ) -> arch_fil
 ```
 
-### (Mis)identification probabilities {.no-mobile}
+### Misidentification probability
 
-```{r out2a}
+```{r out2}
 # Create the base figure and steps for the first subplot of the second plot:
-out2a <- create(
+out2 <- create(
   z_var = "P(cis|+)", 
   # Detailed information:
   # hovertemplate = paste0(
@@ -427,7 +452,9 @@ out2a <- create(
     "%{x}, %{y}",
     "<extra>%{z:.2%}</extra>"
   ),
-  plot_title = "", 
+  plot_title = paste0(
+    "Probability of mistaken identification as trans"
+  ),
   cbar_title = paste0(
     "Probability that a\n",
     "person perceived to\n",
@@ -442,71 +469,14 @@ out2a <- create(
   minZ = 0, 
   maxZ = 1,
   cbar_x = 1, 
-  cbar_y = 1.05, 
-  cbar_len = 0.5
+  cbar_y = 1, 
+  cbar_len = 1
 )
-```
-
-```{r out2b}
-# Create the base figure and steps for the second subplot of the second plot:
-out2b <- create(
-  z_var = "P(trans|+)", 
-  # Detailed information:
-  # hovertemplate = paste0(
-  #   "Accuracy for identifying a person who is:\n",
-  #   "\t • Trans: %{x}<br>",
-  #   "\t • Not trans: %{y}<br>",
-  #   "Probability that a person perceived to be<br>",
-  #   "trans is actually not trans: %{z:.2%}",
-  #   "<extra>%{fullData.name}</extra>"
-  # ), 
-  hovertemplate = paste0(
-    "%{x}, %{y}",
-    "<extra>%{z:.2%}</extra>"
-  ),
-  plot_title = paste0(
-    "Probabilities of misidentification as trans\n",
-    "and correct identification as trans"
-  ), 
-  cbar_title = paste0(
-    "Probability that a\n",
-    "person perceived to\n",
-    "be trans is actually\n",
-    "trans <i>(correct\n",
-    "identification)</i>"
-  ),
-  tickprefix = NULL,
-  ticksuffix = NULL,
-  cbar_pal = "D", 
-  cbar_tickformat = "%",
-  minZ = 0, 
-  maxZ = 1,
-  cbar_x = 1, 
-  cbar_y = 0.5, 
-  cbar_len = 0.5
-)
-```
-
-```{r assemble}
-# Assemble the subplots into a single figure:
-fig2a <- out2a$fig
-fig2b <- out2b$fig
-
-subplot(
-  fig2a, 
-  fig2b, 
-  nrows = 2, 
-  margin = 0.05, 
-  shareX = TRUE, 
-  shareY = TRUE, 
-  titleX = TRUE, 
-  titleY = TRUE
-) -> fig2
 ```
 
 ```{r slider2}
 # Add slider control to plot:
-fig2 %>%
+out2$fig %>%
   layout(
     sliders = list(
       list(
@@ -515,8 +485,8 @@ fig2 %>%
           prefix = "Trans prevalence: ",
           suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
         ),
-        steps = out2a$steps,
-        pad = list(t = 100, r = -75, b = 0, l = -75),
+        steps = out2$steps,
+        pad = list(t = 90, r = -75, b = 0, l = -75),
         scene = list(x = 1, y = 1, z = 1)
       )
     )
@@ -545,7 +515,91 @@ fig2 %>%
 fig2
 ```
 
-> Move your mouse pointer over the plot to see the probabilities for mistaken identifications and correct identifications. Use the slider to vary the percentage of the population who are trans. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentage of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
+> Move your mouse pointer over the plot to see the probability for mistaken identification. Use the slider to vary the percentage of the population who are trans. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentage of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
+
+### Identification probability
+
+```{r out3}
+# Create the base figure and steps for the second subplot of the second plot:
+out3 <- create(
+  z_var = "P(trans|+)", 
+  # Detailed information:
+  # hovertemplate = paste0(
+  #   "Accuracy for identifying a person who is:\n",
+  #   "\t • Trans: %{x}<br>",
+  #   "\t • Not trans: %{y}<br>",
+  #   "Probability that a person perceived to be<br>",
+  #   "trans is actually not trans: %{z:.2%}",
+  #   "<extra>%{fullData.name}</extra>"
+  # ), 
+  hovertemplate = paste0(
+    "%{x}, %{y}",
+    "<extra>%{z:.2%}</extra>"
+  ),
+  plot_title = paste0(
+    "Probability of correct identification as trans"
+  ), 
+  cbar_title = paste0(
+    "Probability that a\n",
+    "person perceived to\n",
+    "be trans is actually\n",
+    "trans <i>(correct\n",
+    "identification)</i>"
+  ),
+  tickprefix = NULL,
+  ticksuffix = NULL,
+  cbar_pal = "D", 
+  cbar_tickformat = "%",
+  minZ = 0, 
+  maxZ = 1,
+  cbar_x = 1, 
+  cbar_y = 1, 
+  cbar_len = 1
+)
+```
+
+```{r slider3}
+# Add slider control to plot:
+out3$fig %>%
+  layout(
+    sliders = list(
+      list(
+        active = p - 1, # Subtract one for the blank plot at the start
+        currentvalue = list(
+          prefix = "Trans prevalence: ",
+          suffix = "<br>(Values < 0.36% or > 0.95% are unlikely)"
+        ),
+        steps = out3$steps,
+        pad = list(t = 90, r = -75, b = 0, l = -75),
+        scene = list(x = 1, y = 1, z = 1)
+      )
+    )
+  ) %>% 
+  {.} -> fig3
+```
+
+```{r plot3}
+fig3 %>% 
+  config(
+    # Control which modebar buttons we want to show the user:
+    modeBarButtons = list(
+      list(
+        "toImage",
+        "toggleSpikelines")
+    ), 
+    displaylogo = FALSE, # Turn off the plotly logo
+    toImageButtonOptions = list(filename = "plotOutput3")
+  ) %>% 
+  # Set the margins and allow the plot to autosize to the user's display:
+  layout(margin = margins, autosize = TRUE) %>% 
+  {.} -> fig3 # Done
+```
+
+```{r show_fig3}
+fig3
+```
+
+> Move your mouse pointer over the plot to see the probability for correct identification. Use the slider to vary the percentage of the population who are trans. Use the slider to vary the percentage of the population who are trans. The default value is the Williams Institute's estimate of the percentage of US adults who are trans (0.58%). The Williams Institute estimated that there is a 95% probability that the US trans prevalence is between 0.36% to 0.95%; *i.e.*, the probability that the US trans prevalence is less than 0.36% or greater than 0.95% is less than 5%.
 
 Column {data-width=220}
 -----------------------------------------
@@ -712,7 +766,7 @@ collapsibleTreeNetwork(
 ) -> probability_tree
 ```
 
-```{r fig3}
+```{r fig4}
 probability_tree
 ```
 
@@ -954,19 +1008,12 @@ Some anti-trans activists claim that people can 100% positively identify both tr
 Column
 -----------------------------------------
 
-### Here's the truth about the anti-LGBT "bathroom predator" myth {.no-mobile}
+### Here's the truth about the anti-LGBT "bathroom predator" myth
 
-```{r video}
-embed_youtube("vo42M8MdznY")
-```
-> YouTube video posted 12 April 2016 by Media Matters for America, shortly after North Carolina passed the Public Facilities Privacy & Security Act (HB2), which was partially repealed on 30 March 2017.
+<div class="video-responsive">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/vo42M8MdznY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
-### Here's the truth about the anti-LGBT "bathroom predator" myth {.mobile}
-
-```{r mobile_video}
-# Smaller version for mobile:
-embed_youtube("vo42M8MdznY", width = 320)
-```
 > YouTube video posted 12 April 2016 by Media Matters for America, shortly after North Carolina passed the Public Facilities Privacy & Security Act (HB2), which was partially repealed on 30 March 2017.
 
 ### References and recommended further reading
@@ -1033,7 +1080,7 @@ State Standards Initiative. Archived from [the original](http://www.corestandard
 #  collate  English_United Kingdom.1252 
 #  ctype    English_United Kingdom.1252 
 #  tz       Europe/Prague               
-#  date     2021-03-02                  
+#  date     2021-03-06                  
 # 
 # - Packages -------------------------------------------------------------------
 #  package         * version date       lib source        
@@ -1047,6 +1094,7 @@ State Standards Initiative. Archived from [the original](http://www.corestandard
 #  collapsibleTree * 0.1.7   2018-08-22 [1] CRAN (R 3.6.3)
 #  colorspace        2.0-0   2020-11-11 [1] CRAN (R 3.6.3)
 #  crayon            1.4.1   2021-02-08 [1] CRAN (R 3.6.3)
+#  crosstalk         1.1.1   2021-01-12 [1] CRAN (R 3.6.3)
 #  data.table        1.13.6  2020-12-30 [1] CRAN (R 3.6.3)
 #  data.tree         1.0.0   2020-08-03 [1] CRAN (R 3.6.3)
 #  DBI               1.1.1   2021-01-15 [1] CRAN (R 3.6.3)
@@ -1057,8 +1105,8 @@ State Standards Initiative. Archived from [the original](http://www.corestandard
 #  dplyr           * 1.0.4   2021-02-02 [1] CRAN (R 3.6.3)
 #  ellipsis          0.3.1   2020-05-15 [1] CRAN (R 3.6.3)
 #  evaluate          0.14    2019-05-28 [1] CRAN (R 3.6.3)
+#  farver            2.0.3   2020-01-16 [1] CRAN (R 3.6.3)
 #  fastmap           1.1.0   2021-01-25 [1] CRAN (R 3.6.3)
-#  flexdashboard     0.5.2   2020-06-24 [1] CRAN (R 3.6.3)
 #  forcats         * 0.5.1   2021-01-27 [1] CRAN (R 3.6.3)
 #  formattable     * 0.2.1   2021-01-07 [1] CRAN (R 3.6.3)
 #  fs                1.5.0   2020-07-31 [1] CRAN (R 3.6.3)
@@ -1099,7 +1147,6 @@ State Standards Initiative. Archived from [the original](http://www.corestandard
 #  rlang             0.4.10  2020-12-30 [1] CRAN (R 3.6.3)
 #  rmarkdown         2.6     2020-12-14 [1] CRAN (R 3.6.3)
 #  rprojroot         2.0.2   2020-11-15 [1] CRAN (R 3.6.3)
-#  rsconnect         0.8.16  2019-12-13 [1] CRAN (R 3.6.3)
 #  rstudioapi        0.13    2020-11-12 [1] CRAN (R 3.6.3)
 #  rvest             0.3.6   2020-07-25 [1] CRAN (R 3.6.3)
 #  scales            1.1.1   2020-05-11 [1] CRAN (R 3.6.3)
@@ -1113,7 +1160,6 @@ State Standards Initiative. Archived from [the original](http://www.corestandard
 #  tidyverse       * 1.3.0   2019-11-21 [1] CRAN (R 3.6.3)
 #  usethis           2.0.1   2021-02-10 [1] CRAN (R 3.6.3)
 #  vctrs             0.3.6   2020-12-17 [1] CRAN (R 3.6.3)
-#  vembedr         * 0.1.4   2020-10-10 [1] CRAN (R 3.6.3)
 #  viridis         * 0.5.1   2018-03-29 [1] CRAN (R 3.6.3)
 #  viridisLite     * 0.3.0   2018-02-01 [1] CRAN (R 3.6.3)
 #  withr             2.4.1   2021-01-26 [1] CRAN (R 3.6.3)
