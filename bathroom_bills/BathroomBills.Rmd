@@ -763,7 +763,7 @@ tree$tooltip <- paste0(
 # Create the probability tree:
 collapsibleTreeNetwork(
   tree,
-  zoomable = FALSE,
+  zoomable = TRUE,
   collapsed = FALSE,
   attribute = "percentage", 
   nodeSize = "nodesize", 
@@ -777,7 +777,7 @@ collapsibleTreeNetwork(
 probability_tree
 ```
 
-> Move your mouse pointer over the nodes in the tree to see the probabilities for each outcome. Click to collapse/expand nodes. The example shown is for a trans prevalence of 0.58%, 99% accuracy to identify trans people, and 97% accuracy to identify people who are not trans. 
+> Move your mouse pointer over the nodes in the tree to see the probabilities for each outcome. Click to collapse/expand nodes. The diagram can be panned and zoomed by dragging and scrolling. The example shown is for a trans prevalence of 0.58%, 99% accuracy to identify trans people, and 97% accuracy to identify people who are not trans. These accuracies are unrealistically high; *in reality, trans people who are not visibly trans are much more common*.
 
 Row
 -----------------------------------------
